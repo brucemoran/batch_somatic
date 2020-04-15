@@ -597,12 +597,19 @@ process fctcsv {
     $germlinebam \
     $tumourbam
 
-  Rscript --vanilla ${workflow.projectDir}/bin/facets_cna.call.R ${sampleID}.facets.r10.csv
+  WCTEST=\$(wc -l ${sampleID}.facets.r10.csv | perl -ane 'print \$F[0];')
 
-  echo -e "Chromosome\\tStart\\tEnd\\tSegment_Mean" > $sampleID".cncf-jointsegs.pcgr.tsv"
-  tail -n+2 $sampleID".fit_cncf-jointsegs.tsv" | awk '{print \$1"\\t"\$10"\\t"\$11"\\t"\$5}' >> $sampleID".cncf-jointsegs.pcgr.tsv"
+  if [[ \$WCTEST > 1 ]]; then
+    Rscript --vanilla ${workflow.projectDir}/bin/facets_cna.call.R ${sampleID}.facets.r10.csv
 
-  tail -n+2 $sampleID".fit_ploidy-purity.tab" > $sampleID".fit_ploidy-purity.pcgr.tsv"
+    echo -e "Chromosome\\tStart\\tEnd\\tSegment_Mean" > $sampleID".cncf-jointsegs.pcgr.tsv"
+    tail -n+2 $sampleID".fit_cncf-jointsegs.tsv" | awk '{print \$1"\\t"\$10"\\t"\$11"\\t"\$5}' >> $sampleID".cncf-jointsegs.pcgr.tsv"
+
+    tail -n+2 $sampleID".fit_ploidy-purity.tab" > $sampleID".fit_ploidy-purity.pcgr.tsv"
+  else
+    echo -e "Chromosome\\tStart\\tEnd\\tSegment_Mean" > $sampleID".cncf-jointsegs.pcgr.tsv"
+    echo -e "NA\tNA" > $sampleID".fit_ploidy-purity.pcgr.tsv"
+  fi
   } 2>&1 | tee > ${sampleID}.facets.log.txt
   """
 }
