@@ -586,6 +586,9 @@ process fctcsv {
   tuple val(sampleID), file("${sampleID}.cncf-jointsegs.pcgr.tsv"), file("${sampleID}.fit_ploidy-purity.pcgr.tsv") into facets_pcgr
   file("${sampleID}.facets.log.txt") into log_facets
 
+  when:
+  params.facets != false
+
   script:
   """
   {

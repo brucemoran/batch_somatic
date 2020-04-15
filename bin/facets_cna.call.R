@@ -6,7 +6,7 @@ tumour <- strsplit(inputCSV,"\\.")[[1]][1]
 set.seed(1234)
 snpmat <- readSnpMatrix(inputCSV)
 if(length(table(snpmat$Chromosome))>22){
-  pps <- preProcSample(snpmat)
+  pps <- preProcSample(snpmat, ndepth=10)
   oo <- procSample(pps)
   fit <- emcncf(oo)
   ploidpurdf <- data.frame(PLOIDY=round(fit$ploidy,digits=3),
