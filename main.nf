@@ -9,14 +9,14 @@ if (params.help) {
   log.info '-----------------------------------------------------------------------'
   log.info ''
   log.info 'Usage: '
-  log.info 'nextflow run brucemoran/somatic_n-of-1'
+  log.info 'nextflow run brucemoran/batch_somatic'
   log.info ''
   log.info 'Mandatory arguments:'
   log.info '    -profile    Configuration profile (required: standard,singularity)'
   log.info '    --sampleCsv      STRING      CSV format, headers: caseID, soma_sampleID, soma_read1, soma_read2, germ_sampleID, germ_read1, germ_read2'
+  log.info '    --refDir        STRING      dir in which reference data and required indices are held; if not specified, this is created by brucemoran/DNAseq_references/GRCh_37-38 (default: work/GRCh38)'
   log.info ''
   log.info 'Optional arguments:'
-  log.info '    --refDir        STRING      dir in which reference data and required indices are held; if not specified, this is created by brucemoran/DNAseq_references/GRCh_37-38 (default: work/GRCh38)'
   log.info '    --exometag        STRING      if multiple exomes have reference data, specify a tag for matching (should have been used at reference generation )'
   log.info '    --germline      STRING      run HaplotypeCaller on germline sample and annotate with CPSR (true/false, default: true)'
   log.info '    --scatGath      NUM         number of pieces to divide intervalList into for scattering to variant calling processes (default: 20 for exome, 100 for WGS)'
@@ -29,7 +29,7 @@ if (params.help) {
 /* -2 Test if refDir is defined, if not run DNAseq_references pipeline under defaults
 */
 if(!params.refDir){
-  exit 1, "Please run: nextflow run brucemoran/DNAseq_references --outDir work -profile standard,singularity, then specify: nextflow run brucemoran/somatic_n-of-1 --refDir work/GRCh38"
+  exit 1, "Please run: nextflow run brucemoran/DNAseq_references --outDir work -profile standard,singularity, then specify: nextflow run brucemoran/batch_somatic --refDir work/GRCh38"
 }
 
 /* -1: Global Variables
@@ -187,7 +187,7 @@ process fastp {
 
   script:
   """
-  fastp -w ${task.cpus} -h $sampleID"_pre.fastp.html" -j $sampleID"_pre.fastp.json" --in1 $preread1 --in2 $preread2
+  fastp -w ${task.cpus} -h $sampleID".fastp.html" -j $sampleID".fastp.json" --in1 $preread1 --in2 $preread2
   """
 }
 
@@ -391,7 +391,6 @@ process haplotypecaller {
 
   output:
   tuple val(caseID), val(sampleID), file('*sort.hc.vcf') into hc_gt
-  tuple val(caseID), val(sampleID) into ( hc_mv, vcfGRaID )
 
   when:
   type == "germline" & params.germline != false
@@ -432,7 +431,6 @@ process hc_merge {
 
   input:
   tuple val(caseID), val(sampleID), file(rawvcfs) from hc_fm
-  tuple val(caseID), val(sampleID) from hc_mv
 
   output:
   tuple val(caseID), val(sampleID), file("${sampleID}.hc.merge.vcf") into cpsr_vcf
@@ -599,7 +597,7 @@ process fctcsv {
     $germlinebam \
     $tumourbam
 
-  Rscript --vanilla  ${workflow.projectDir}/bin/facets_cna.call.R ${sampleID}.facets.r10.csv
+  Rscript --vanilla ${workflow.projectDir}/bin/facets_cna.call.R ${sampleID}.facets.r10.csv
 
   echo -e "Chromosome\\tStart\\tEnd\\tSegment_Mean" > $sampleID".cncf-jointsegs.pcgr.tsv"
   tail -n+2 $sampleID".fit_cncf-jointsegs.tsv" | awk '{print \$1"\\t"\$10"\\t"\$11"\\t"\$5}' >> $sampleID".cncf-jointsegs.pcgr.tsv"
@@ -627,7 +625,7 @@ process fctcon {
   script:
   """
   {
-  Rscript --vanilla  ${workflow.projectDir}/bin/facets_cna_consensus.call.R \
+  Rscript --vanilla ${workflow.projectDir}/bin/facets_cna_consensus.call.R \
     $dict \
     ./ \
     ${workflow.projectDir}/bin/facets_cna_consensus.func.R
@@ -1150,7 +1148,7 @@ process mltiQC {
 
   script:
   """
-  OUTID=\$(basename ${workflow.launchDir})".somatic_n-of-1"
+  OUTID=\$(basename ${workflow.launchDir})".batch_somatic"
   multiqc . -i \$OUTID --tag DNA -f -c ${params.multiqcConfig}
   """
 }

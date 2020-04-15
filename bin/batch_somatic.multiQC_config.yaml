@@ -46,6 +46,9 @@ extra_fn_clean_exts:
     - .R2.fastq.gz
     - .bbduk.R1.fastq.gz
     - .bbduk.R1.fastq.gz
+    - .fastp.json
+    - .post.fastp.json
+    - .pre.fastp.json
     - .bbsplit.refstats.txt
     - .bam
     - .sort

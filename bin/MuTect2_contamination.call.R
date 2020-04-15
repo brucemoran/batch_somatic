@@ -1,4 +1,4 @@
-#! R
+#! /usr/bin/env R
 argsIn <- commandArgs(trailingOnly = TRUE)
 tab1 <- read.table(argsIn[1], header=T)
 
