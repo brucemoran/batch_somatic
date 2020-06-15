@@ -74,6 +74,7 @@ params.gpstbi = Channel.fromPath("$params.refDir/${params.seqlevel}/af-only-gnom
 //PCGR, CPSR version and base data dir
 params.grchvers = Channel.fromPath("$params.refDir/pcgr/data").getVal()
 params.pcgrdir = Channel.fromPath("$params.refDir/pcgr").getVal()
+params.pcgrtoml = Channel.fromPath("$params.refDir/pcgr/data/${params.grchvers}/pcgr_configuration_${params.exometag}.toml").getVal()
 
 //somaticVariantConsensus scripts
 process cons_scripts {
@@ -149,9 +150,21 @@ process bbduk {
   taskmem = javaTaskmem("${task.memory}")
   """
   {
+  ##remove because of issues on readname including "1:xyz, 2:xyz for R1, R2"
+  if [[ $read1 =~ ".gz"\$ ]]; then
+    gunzip -c $read1 | perl -ane 'chomp; print "\$F[0]\\n";' > r1.fq
+    gunzip -c $read2 | perl -ane 'chomp; print "\$F[0]\\n";' > r2.fq
+  else
+    perl -ane 'chomp; print "\$F[0]\\n";' $read1 > r1.fq
+    perl -ane 'chomp; print "\$F[0]\\n";' $read2 > r2.fq
+  fi
+
+  ##repair in case of disorder
+  repair.sh in1=r1.fq in2=r2.fq out1=r1.f.fq out2=r2.f.fq repair
+
   sh bbduk.sh -Xmx$taskmem \
-    in1=$read1 \
-    in2=$read2 \
+    in1=r1.f.fq \
+    in2=r2.f.fq \
     out1=$sampleID".bbduk.R1.fastq.gz" \
     out2=$sampleID".bbduk.R2.fastq.gz" \
     k=31 \
@@ -167,6 +180,7 @@ process bbduk {
     stats=$sampleID".bbduk.adapterstats.txt" \
     overwrite=T
   } 2>&1 | tee > ${sampleID}.bbduk.runstats.txt
+  rm r*.fq
   """
 }
 
@@ -1022,6 +1036,8 @@ process vepann {
       --hgvs \
       --canonical \
       --ccds \
+      --sift b \
+      --polyphen b \
       --force_overwrite \
       --verbose
   done
@@ -1045,7 +1061,7 @@ process vcfGRa {
 
   label 'med_mem'
 
-  publishDir "$params.outDir/cases/$caseID/consensus_vcfs", pattern: '*.[*RData,*tab]'
+  publishDir "$params.outDir/cases/$caseID/consensus_vcfs"
 
   input:
   tuple val(caseID), file(vvcf1), file(vvcf2), file(vvcf3), file(rvcf1), file(rvcf2), file(rvcf3) from cons_vcfs
@@ -1102,6 +1118,7 @@ process pcgrreport {
 
   input:
   tuple val(sampleID), file(vcf), file(jointsegs), file(ploidpur) from pcgr_inputs
+  file(toml) from Channel.value([params.pcgrtoml])
 
   output:
   file('*') into completedPCGR
@@ -1119,19 +1136,20 @@ process pcgrreport {
   fi
 
   VERS=\$(ls ${params.pcgrdir}/data)
-  CONFIG=\$(readlink -e ${params.pcgrdir}/data/*/pcgr_configuration_default.toml)
 
+  ##8 lines in an empty VCF
   LINETEST=\$(wc -l $vcf | perl -ane 'print \$F[0];')
+
   if [[ \$LINETEST != 8 ]]; then
     pcgr.py ${params.pcgrdir} \
-      ./ \
-      \$VERS \
-      \$CONFIG \
-      $sampleID \
       --input_vcf $vcf \
       --input_cna $jointsegs \$PLOIDY \$PURITY \
       --no-docker \
-      --force_overwrite
+      --force_overwrite \
+      ./ \
+      \$VERS \
+      $toml \
+      $sampleID
   else
     echo "No variants"
   fi
