@@ -1441,7 +1441,7 @@ process vepSomtsv {
   file(vcf) from vep_som_tsv.collect()
 
   output:
-  file("${params.runID}.consensus_variants.tabvcf.tsv") into madetsv
+  file("${params.runID}.consensus_variants.tabvcf.tsv") into madetsv2
 
   script:
   """
