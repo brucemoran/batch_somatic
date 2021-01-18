@@ -514,7 +514,7 @@ process scat_gath {
   def sgcount = params.scatGath
   if (params.scatGath == null){
     if (params.seqlevel == "panel"){
-      sgcount = 1
+      sgcount = 2
     }
     if (params.seqlevel == "exome"){
       sgcount = 20
@@ -535,7 +535,7 @@ process scat_gath {
   picard IntervalListTools \
     I=used.interval_list \
     SCATTER_COUNT=${sgcount} \
-    O=./
+    O=\$(pwd)
 
   ##rename scatters and parse into appropriate format for tools
   ls temp*/* | while read FILE; do
