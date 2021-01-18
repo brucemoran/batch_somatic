@@ -687,7 +687,7 @@ process vepHCtsv {
   publishDir path: "${params.outDir}/output/haplotypecaller", mode: "copy"
 
   input:
-  file("${vcf_anno}") into hc_vepd.collect()
+  file("${vcf_anno}") from hc_vepd.collect()
 
   output:
   file("${params.runID}.haplotypecaller_all.tabvcf.tsv") into madetsv
