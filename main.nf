@@ -1438,7 +1438,7 @@ process vepSomtsv {
   publishDir path: "${params.outDir}/output/consensus_variants/combine_vcf", mode: "copy"
 
   input:
-  file(vcf) into vep_som_tsv.collect()
+  file(vcf) from vep_som_tsv.collect()
 
   output:
   file("${params.runID}.consensus_variants.tabvcf.tsv") into madetsv
