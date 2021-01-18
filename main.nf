@@ -514,7 +514,7 @@ process scat_gath {
   def sgcount = params.scatGath
   if (params.scatGath == null){
     if (params.seqlevel == "panel"){
-      sgcount = 2
+      sgcount = 1
     }
     if (params.seqlevel == "exome"){
       sgcount = 20
@@ -615,7 +615,7 @@ process hc_merge {
   label 'high_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/gatk4/haplotypecaller", mode: "copy", pattern: '*.hc.merge.vcf.gz'
-  publishDir path: "$params.outDir/output/vcf/haplotypecaller", mode: "copy", pattern: '*.hc.merge.vcf.gz'
+  publishDir path: "$params.outDir/output/haplotypecaller", mode: "copy", pattern: '*.hc.merge.vcf.gz'
 
   input:
   tuple val(caseID), val(sampleID), file(rawvcfs) from hc_fm
@@ -638,7 +638,7 @@ process vepHC {
   label 'low_mem'
 
   publishDir path: "${params.outDir}/cases/${caseID}/vcf", mode: "copy"
-  publishDir path: "${params.outDir}/output/vcf/haplotypecaller", mode: "copy"
+  publishDir path: "${params.outDir}/output/haplotypecaller", mode: "copy"
 
   input:
   tuple val(caseID), val(sampleID), file(vcf), file(tbi) from vep_hc_vcf
@@ -679,23 +679,23 @@ process vepHC {
   """
 }
 
-// // 2.12: VCF to consensus TSV
-// process vepHCtsv {
-//
-//   label 'low_mem'
-//
-//   publishDir path: "${params.outDir}/output/data/haplotypecaller", mode: "copy"
-//
-//   input:
-//   file("${vcf_anno}") into hc_vepd
-//
-//   script:
-//   def grch_vers = "${grchver}".split("\\/")[-1]
-//   def vcf_anno = "${vcf}".replace(".vcf.gz", ".vep.vcf")
-//   """
-//
-//   """
-// }
+// 2.12: VCF to CSV
+process vepHCtsv {
+
+  label 'low_mem'
+
+  publishDir path: "${params.outDir}/output/haplotypecaller", mode: "copy"
+
+  input:
+  file("${vcf_anno}") into hc_vepd.collect()
+
+  output:
+  file("${params.runID}.haplotypecaller_all.tabvcf.tsv") into madetsv
+  script:
+  """
+  perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${params.runID}.haplotypecaller_all"
+  """
+}
 
 // 2.2: CPSR annotation of GATK4 Germline
 process cpsrreport {
@@ -1019,7 +1019,7 @@ process mutct2_contam_filter {
   label 'med_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/mutect2", mode: "copy", overwrite: true
-  publishDir path: "$params.outDir/output/vcf/mutect2", mode: "copy", pattern = "*.[mutect2.raw.vcf, mutect2.snv_indel.pass.vcf]"
+  publishDir path: "$params.outDir/output/mutect2", mode: "copy", pattern = "*.[mutect2.raw.vcf, mutect2.snv_indel.pass.vcf]"
 
   input:
   tuple val(caseID), val(sampleID), file(tumourbam), file(tumourbai), val(germlineID), file(germlinebam), file(germlinebai), file(mergevcf), file(statsvcf), file(readorient) from mutect2_contam_merge
@@ -1084,7 +1084,7 @@ process mntstr {
   label 'high_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/manta-strelka2", overwrite: 'true', mode: "copy"
-  publishDir path: "${params.outDir}/output/vcf/manta-strelka2", mode: "copy", pattern: '*[.strelka2.snv_indel.raw.vcf, .strelka2.snv_indel.pass.vcf]'
+  publishDir path: "${params.outDir}/output/manta-strelka2", mode: "copy", pattern: '*[.strelka2.snv_indel.raw.vcf, .strelka2.snv_indel.pass.vcf]'
 
   input:
   tuple val(caseID), val(sampleID), file(tumourbam), file(tumourbai), val(germlineID), file(germlinebam), file(germlinebai) from mantastrelka2ing
@@ -1204,7 +1204,7 @@ process lancet_filter {
   label 'med_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/lancet"
-  publishDir path: "${params.outDir}/output/vcf/lancet", mode: "copy", pattern: '*.[raw.vcf, .lancet.snv_indel.pass.vcf]'
+  publishDir path: "${params.outDir}/output/lancet", mode: "copy", pattern: '*.[raw.vcf, .lancet.snv_indel.pass.vcf]'
 
   input:
   tuple val(caseID), val(sampleID), file(mergevcf) from lancet_merge
@@ -1243,7 +1243,7 @@ process vepann {
   label 'med_mem'
 
   publishDir path: "${params.outDir}/cases/${caseID}/vcf", mode: "copy", pattern: '*.vcf'
-  publishDir path: "${params.outDir}/output/vcf", mode: "copy", pattern: '*.vcf'
+  publishDir path: "${params.outDir}/output/VEP", mode: "copy", pattern: '*.vcf'
 
   input:
   tuple val(caseID), file(vcf1), file(vcf2), file(vcf3) from case_veping
@@ -1299,7 +1299,7 @@ runGRanges
   .groupTuple()
   .map { it -> [it[0], it[1][0], it[1][1], it[1][2], it[2], it[3], it[4]] }
   .join(vcfGraGermline)
-  .set { cons_vcfs }
+  .into { cons_vcfs; cons_comb  }
 
 Channel
   .from("${params.impacts}")
@@ -1313,8 +1313,8 @@ process vcfGRa {
 
   publishDir "$params.outDir/cases/$caseID/consensus_vcfs"
   publishDir "${params.outDir}/output/consensus_variants/pdf", mode: "copy", pattern: '*.pdf'
-  publishDir "${params.outDir}/output/vcf/pcgr", mode: "copy", pattern: '*.impacts.pcgr.tsv.vcf'
-  publishDir "${params.outDir}/output/data", mode: "copy", pattern: '*[.RData, .tsv]'
+  publishDir "${params.outDir}/output/consensus_variants/vcf", mode: "copy", pattern: '*.impacts.pcgr.tsv.vcf'
+  publishDir "${params.outDir}/output/consensus_variants/data", mode: "copy", pattern: '*[.RData, .tsv]'
 
   input:
   tuple val(caseID), file(vvcf1), file(vvcf2), file(vvcf3), file(rvcf1), file(rvcf2), file(rvcf3), val(germlineID) from cons_vcfs
@@ -1384,6 +1384,7 @@ process pcgrreport {
 
   output:
   file('*') into completedPCGR
+  tuple val(sampleID), file(vcf), file("${sampleID}.pcgr_acmg.grch38.pass.vcf.gz") into cons_comb_pcgr
 
   script:
   caseID="${sampleID}".split("${params.tumourIDsplit}")[0]
@@ -1407,6 +1408,44 @@ process pcgrreport {
       --no_vcf_validate
 
   } 2>&1 | tee > ${sampleID}.pcgr.log.txt
+  """
+}
+
+//  3.4 PCGR + consensus VCF to make a good VCF for combining
+process prepvepSomtsv {
+
+  label 'low_mem'
+
+  input:
+  tuple val(sampleID), file(vcf), file(vep) from cons_comb_pcgr
+
+  output:
+  file("${sampleID}.${params.runID}.combine.vcf") into vep_som_tsv
+
+  script:
+  """
+  perl ${workflow.projectDir}/bin/combine_select_elements.pl \
+    $vep \
+    $vcf \
+    ${sampleID}.${params.runID}.combine.vcf
+  """
+}
+
+process vepSomtsv {
+
+  label 'low_mem'
+
+  publishDir path: "${params.outDir}/output/consensus_variants/combine_vcf", mode: "copy"
+
+  input:
+  file(vcf) into vep_som_tsv.collect()
+
+  output:
+  file("${params.runID}.consensus_variants.tabvcf.tsv") into madetsv
+
+  script:
+  """
+  perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${params.runID}.consensus_variants"
   """
 }
 
