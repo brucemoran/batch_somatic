@@ -44,6 +44,7 @@ dependencies:
   - r-facets=0.5.14
   - r-plyr
   - r-dplyr
+  - r-ggrepel
   - r-pheatmap
   - r-sequenza=2.1.2
   - r-tidyverse

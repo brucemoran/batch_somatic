@@ -46,9 +46,6 @@ extra_fn_clean_exts:
     - .R2.fastq.gz
     - .bbduk.R1.fastq.gz
     - .bbduk.R1.fastq.gz
-    - .fastp.json
-    - .post.fastp.json
-    - .pre.fastp.json
     - .bbsplit.refstats.txt
     - .bam
     - .sort
@@ -111,9 +108,9 @@ sp:
 
 
 # Specify a custom logo to add to reports (uncomment to use)
-custom_logo: '/home/bmoran/BMB/happy_computer_guy.jpg'
-custom_logo_url: null     # 'https://www.example.com'
-custom_logo_title: 'Bruce Moran Bioinformatics'
+#custom_logo: '/home/bmoran/BMB/happy_computer_guy.jpg'
+# custom_logo_url: null     # 'https://www.example.com'
+# custom_logo_title: 'Bruce Moran Bioinformatics'
 subtitle: null            # Grey text below title
 intro_text: null          # Set to False to remove, or your own text
 
