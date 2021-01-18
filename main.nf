@@ -54,7 +54,7 @@ if(!Channel.from(params.assembly, checkIfExists: true)){
 // }
 
 //Globals
-params.outDir = "batch_${params.seqLevel}"
+params.outDir = "batch_${params.seqLevel}/${params.runID}"
 params.seqlevel = "${params.seqLevel}".toLowerCase()
 
 //Java task memory allocation via task.memory
