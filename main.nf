@@ -649,11 +649,10 @@ process vepHC {
   file(pcgrbase) from reference.pcgrbase
 
   output:
-  file("${vcf_anno}") into hc_vepd
+  file("${sampleID}.hc.merge.vep.vcf") into hc_vepd
 
   script:
-  def grch_vers = "${grchver}".split("\\/")[-1]
-  def vcf_anno = "${vcf}".replace(".vcf.gz", ".vep.vcf")
+  grch_vers = "${grchver}".split("\\/")[-1]
   """
   vep --dir_cache ${pcgrbase}/data/${grch_vers}/.vep \
     --offline \
@@ -668,7 +667,7 @@ process vepHC {
     --af_gnomad \
     --vcf \
     --input_file ${vcf} \
-    --output_file ${vcf_anno} \
+    --output_file ${sampleID}.hc.merge.vep.vcf \
     --format "vcf" \
     --fasta ${fasta} \
     --hgvs \
@@ -687,7 +686,7 @@ process vepHCtsv {
   publishDir path: "${params.outDir}/output/haplotypecaller", mode: "copy"
 
   input:
-  file("${vcf_anno}") from hc_vepd.collect()
+  file(vcf_vep) from hc_vepd.collect()
 
   output:
   file("${params.runID}.haplotypecaller_all.tabvcf.tsv") into madetsv
