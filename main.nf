@@ -88,7 +88,7 @@ reference.pcgrbase = Channel.value(file(params.genomes[params.assembly].pcgr))
 
 //change panel to exome as we haven't drawn distinction before
 //also add exomeTag to specify dir for files input
-reference.seqlevel = params.seqlevel == "panel" ? Channel.value(file(params.genomes[params.assembly]."exome/${params.exomeTag}")) : Channel.value(file(params.genomes[params.assembly]."${params.seqlevel}/${params.exomeTag}"))
+reference.seqlevel = params.seqlevel == "panel" ? Channel.value(file(params.genomes[params.assembly]."/exome/${params.exomeTag}")) : Channel.value(file(params.genomes[params.assembly]."/${params.seqlevel}/${params.exomeTag}"))
 
 //set cosmic
 reference.cosmic = params.cosmic == true ? Channel.value(file(params.genomes[params.assembly].cosmic)) : null
