@@ -88,7 +88,7 @@ reference.pcgrbase = Channel.value(file(params.genomes[params.assembly].pcgr))
 
 //change panel to exome as we haven't drawn distinction before
 //also add exomeTag to specify dir for files input
-reference.seqlevel = params.seqlevel == "panel" ? Channel.value(file(params.genomes[params.assembly]."/exome/".params.exomeTag)) : Channel.value(file(params.genomes[params.assembly]."/".params.seqlevel."/".params.exomeTag))
+reference.seqlevel = Channel.value(file(params.genomes[params.assembly].exome))
 
 //set cosmic
 reference.cosmic = params.cosmic == true ? Channel.value(file(params.genomes[params.assembly].cosmic)) : null
@@ -403,7 +403,7 @@ if(params.agilentUMI){
 
     script:
     def taskmem = task.memory == null ? "" : "-Xmx" + javaTaskmem("${task.memory}")
-    def bedfile = "${exome}/${params.exomeTag}.bed"
+    def bedfile = "${exome}/${params.exomeTag}/${params.exomeTag}.bed"
     """
     {
       java ${taskmem} \
@@ -1036,7 +1036,7 @@ process mutct2_contam_filter {
 
   script:
   def taskmem = task.memory == null ? "" : "--java-options \"-Xmx" + javaTaskmem("${task.memory}") + "\""
-  def gpsgz = params.seqlevel == "exome " || "panel" ? "${gps_files}/af-only-gnomad.${params.exomeTag}.hg*.noChr.vcf.gz" : "${gps_files}/af-only-gnomad.wgs.hg*.noChr.vcf.gz"
+  def gpsgz = params.seqlevel == "exome " || "panel" ? "${gps_files}/${params.exomeTag}/af-only-gnomad.${params.exomeTag}.hg*.noChr.vcf.gz" : "${gps_files}/af-only-gnomad.wgs.hg*.noChr.vcf.gz"
   """
   gatk ${taskmem} \
     GetPileupSummaries \
@@ -1100,7 +1100,7 @@ process mntstr {
   tuple val(caseID), val(germlineID) into vcfGraGermline
 
   script:
-  def bedgz = params.seqlevel == "wgs" ? "${bed_files}/wgs.bed.gz" : "${bed_files}/${params.exomeTag}.bed.gz"
+  def bedgz = params.seqlevel == "wgs" ? "${bed_files}/wgs.bed.gz" : "${bed_files}/${params.exomeTag}/${params.exomeTag}.bed.gz"
   def callRegions = params.seqlevel == "exome" || "panel" ? "--exome --callRegions ${bedgz}" : "--callRegions ${bedgz}"
   """
   {
