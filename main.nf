@@ -1325,10 +1325,11 @@ process vcfGRa {
   file('*') into completedvcfGRangesConsensus
 
   script:
-  sampleID = "${vvcf1}".split("\\.")[0]
+  def sampleID = "${vvcf1}".split("\\.")[0]
   def inc_ord = params.incOrder ? params.incOrder : "noord"
   def which_genome = params.assembly == "GRCh37" ? "hg19" : "hg38"
   """
+  echo ${sampleID} > sId.txt && rm sID.txt
   Rscript -e "somenone::variant_consensus(germline_id = \\"${germlineID}\\", vep_vcf_pattern = \\"snv_indel.pass.vep.vcf\\", raw_vcf_pattern = \\"raw.vcf\\", tag = \\"${params.runID}\\", which_genome = \\"${which_genome}\\", included_order = \\"${inc_ord}\\", impacts = \\"${impact}\\")"
   """
 }
