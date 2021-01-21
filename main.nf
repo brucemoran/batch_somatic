@@ -94,7 +94,7 @@ reference.seqlevel = Channel.value(file(params.genomes[params.assembly].exome))
 reference.cosmic = params.cosmic == true ? Channel.value(file(params.genomes[params.assembly].cosmic)) : null
 
 //setting of intlist based on seqlevel and exomeTag
-reference.intlist = params.seqlevel == "wgs" ? Channel.fromPath("${params.refDir}/${params.assembly}/${params.seqlevel}/wgs.bed.interval_list").getVal() : Channel.fromPath("${params.refDir}/${params.assembly}/exome/${params.exomeTag}.bed.interval_list").getVal()
+reference.intlist = params.seqlevel == "wgs" ? Channel.fromPath("${params.refDir}/${params.assembly}/${params.seqlevel}/wgs.bed.interval_list").getVal() : Channel.fromPath("${params.refDir}/${params.assembly}/exome/${params.exomeTag}/${params.exomeTag}.bed.interval_list").getVal()
 
 //Java task memory allocation via task.memory
 javaTaskmem = { it.replace(" GB", "g") }
