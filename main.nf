@@ -1318,7 +1318,7 @@ process vcfGRa {
   each impact from impactss
 
   output:
-  tuple val(caseID), val(sampleID), file("${sampleID}.*impacts.pcgr.tsv.vcf") into vcfs_pcgr
+  tuple val(caseID), val("${sampleID}"), file("${sampleID}.*impacts.pcgr.tsv.vcf") into vcfs_pcgr
   file('*') into completedvcfGRangesConsensus
 
   script:
