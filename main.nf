@@ -1322,7 +1322,7 @@ process vcfGRa {
   file('*') into completedvcfGRangesConsensus
 
   script:
-  def sampleID = "${vvcf1}".split("\\.")[0]
+  sampleID = "${vvcf1}".split("\\.")[0]
   def inc_ord = params.incOrder ? params.incOrder : "noord"
   def which_genome = params.assembly == "GRCh37" ? "hg19" : "hg38"
   """
