@@ -612,8 +612,7 @@ process hc_merge {
 
   label 'high_mem'
 
-  publishDir path: "$params.outDir/cases/$caseID/gatk4/haplotypecaller", mode: "copy", pattern: '*.hc.merge.vcf.gz'
-  publishDir path: "$params.outDir/output/haplotypecaller", mode: "copy", pattern: '*.hc.merge.vcf.gz'
+  publishDir path: "$params.outDir/cases/$caseID/haplotypecaller", mode: "copy", pattern: '*.hc.merge.vcf.gz'
 
   input:
   tuple val(caseID), val(sampleID), file(rawvcfs) from hc_fm
@@ -635,8 +634,7 @@ process vepHC {
 
   label 'low_mem'
 
-  publishDir path: "${params.outDir}/cases/${caseID}/vcf", mode: "copy"
-  publishDir path: "${params.outDir}/output/haplotypecaller", mode: "copy"
+  publishDir path: "${params.outDir}/cases/${caseID}/haplotypecaller", mode: "copy"
 
   input:
   tuple val(caseID), val(sampleID), file(vcf), file(tbi) from vep_hc_vcf
@@ -681,13 +679,14 @@ process vepHCtsv {
 
   label 'low_mem'
 
-  publishDir path: "${params.outDir}/output/haplotypecaller", mode: "copy"
+  publishDir path: "${params.outDir}/combined/haplotypecaller", mode: "copy"
 
   input:
   file(vcf_vep) from hc_vepd.collect()
 
   output:
-  file("${params.runID}.haplotypecaller_all.tabvcf.tsv") into madetsv
+  file("${params.runID}.haplotypecaller_all.tab.vcf.tsv") into madetsv
+
   script:
   """
   perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${params.runID}.haplotypecaller_all"
@@ -861,7 +860,7 @@ process fctcon {
 
   label 'med_mem'
 
-  publishDir "$params.outDir/reports/scna/facets"
+  publishDir "$params.outDir/combined/facets"
 
   input:
   file(filesn) from facets_consensusing.collect()
@@ -1016,7 +1015,6 @@ process mutct2_contam_filter {
   label 'med_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/mutect2", mode: "copy", overwrite: true
-  publishDir path: "$params.outDir/output/mutect2", mode: "copy", pattern: "*.{mutect2.raw.vcf, mutect2.snv_indel.pass.vcf}"
 
   input:
   tuple val(caseID), val(sampleID), file(tumourbam), file(tumourbai), val(germlineID), file(germlinebam), file(germlinebai), file(mergevcf), file(statsvcf), file(readorient) from mutect2_contam_merge
@@ -1081,7 +1079,6 @@ process mntstr {
   label 'high_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/manta-strelka2", overwrite: 'true', mode: "copy"
-  publishDir path: "${params.outDir}/output/manta-strelka2", mode: "copy", pattern: '*{.strelka2.snv_indel.raw.vcf, .strelka2.snv_indel.pass.vcf}'
 
   input:
   tuple val(caseID), val(sampleID), file(tumourbam), file(tumourbai), val(germlineID), file(germlinebam), file(germlinebai) from mantastrelka2ing
@@ -1201,7 +1198,6 @@ process lancet_filter {
   label 'med_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/lancet"
-  publishDir path: "${params.outDir}/output/lancet", mode: "copy", pattern: '*.{raw.vcf, lancet.snv_indel.pass.vcf}'
 
   input:
   tuple val(caseID), val(sampleID), file(mergevcf) from lancet_merge
@@ -1239,8 +1235,9 @@ process vepann {
 
   label 'med_mem'
 
-  publishDir path: "${params.outDir}/cases/${caseID}/vcf", mode: "copy", pattern: '*.vcf'
-  publishDir path: "${params.outDir}/output/VEP", mode: "copy", pattern: '*.vcf'
+  publishDir path: "${params.outDir}/cases/${caseID}/lancet", mode: "copy", pattern: "${sampleID}.lancet.snv_indel.pass.vep.vcf"
+  publishDir path: "${params.outDir}/cases/${caseID}/mutect2", mode: "copy", pattern: "${sampleID}.mutect2.snv_indel.pass.vep.vcf"
+  publishDir path: "${params.outDir}/cases/${caseID}/manta-strelka2", mode: "copy", pattern: "${sampleID}.strelka2.snv_indel.pass.vep.vcf"
 
   input:
   tuple val(caseID), file(vcf1), file(vcf2), file(vcf3) from case_veping
@@ -1308,10 +1305,7 @@ process vcfGRa {
 
   label 'med_mem'
 
-  publishDir "$params.outDir/cases/$caseID/consensus_vcfs"
-  publishDir "${params.outDir}/output/consensus_variants/pdf", mode: "copy", pattern: '*.pdf'
-  publishDir "${params.outDir}/output/consensus_variants/vcf", mode: "copy", pattern: '*.impacts.pcgr.tsv.vcf'
-  publishDir "${params.outDir}/output/consensus_variants/data", mode: "copy", pattern: '*[.RData, .tsv]'
+  publishDir "$params.outDir/cases/$caseID/consensus_variants", mode: 'copy', pattern: '!sId.txt'
 
   input:
   tuple val(caseID), file(vvcf1), file(vvcf2), file(vvcf3), file(rvcf1), file(rvcf2), file(rvcf3), val(germlineID) from cons_vcfs
@@ -1434,7 +1428,7 @@ process vepSomtsv {
 
   label 'low_mem'
 
-  publishDir path: "${params.outDir}/output/consensus_variants/combine_vcf", mode: "copy"
+  publishDir path: "${params.outDir}/combined/consensus_variants", mode: "copy"
 
   input:
   file(vcf) from vep_som_tsv.collect()
