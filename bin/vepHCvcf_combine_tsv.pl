@@ -12,7 +12,7 @@ use Sort::Naturally;
 ##report full VEP string annotation for each row
 
 ##set inputs; runs on a dir (currdir) of VCFs
-my @vcfs = `ls *vep.vcf`;
+my @vcfs = `ls *.vcf`;
 my $hcount = 0;
 
 ##capture variants (rows not prefixed #)
@@ -71,7 +71,7 @@ close OUTH;
 ##now we have all vars, and all vars per sample
 ##we parse this and print output
 ##first header line
-open(OUT, "> " . $ARGV[0] . ".tabvcf.tsv");
+open(OUT, "> " . $ARGV[0] . ".tab.vcf.tsv");
 print OUT "variant\t" . join("\t", @IDs) . "\t$chrom\tVEP\n";
 
 foreach my $ky (nsort keys %vars){
