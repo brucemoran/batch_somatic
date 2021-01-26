@@ -765,7 +765,7 @@ process mltmet {
 
   label 'med_mem'
 
-  publishDir "$params.outDir/cases/$caseID/metrics", overwrite: 'true'
+  publishDir "$params.outDir/cases/$caseID/metrics", mode: 'copy', overwrite: 'true'
 
   input:
   tuple val(caseID), val(type), val(sampleID), file(bam), file(bai) from gmultimetricing
@@ -1197,7 +1197,7 @@ process lancet_filter {
 
   label 'med_mem'
 
-  publishDir path: "$params.outDir/cases/$caseID/lancet"
+  publishDir path: "$params.outDir/cases/$caseID/lancet", mode: 'copy', overwrite: 'true'
 
   input:
   tuple val(caseID), val(sampleID), file(mergevcf) from lancet_merge
