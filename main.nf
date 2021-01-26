@@ -1016,7 +1016,7 @@ process mutct2_contam_filter {
   label 'med_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/mutect2", mode: "copy", overwrite: true
-  publishDir path: "$params.outDir/output/mutect2", mode: "copy", pattern = "*.[mutect2.raw.vcf, mutect2.snv_indel.pass.vcf]"
+  publishDir path: "$params.outDir/output/mutect2", mode: "copy", pattern: "*.{mutect2.raw.vcf, mutect2.snv_indel.pass.vcf}"
 
   input:
   tuple val(caseID), val(sampleID), file(tumourbam), file(tumourbai), val(germlineID), file(germlinebam), file(germlinebai), file(mergevcf), file(statsvcf), file(readorient) from mutect2_contam_merge
@@ -1081,7 +1081,7 @@ process mntstr {
   label 'high_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/manta-strelka2", overwrite: 'true', mode: "copy"
-  publishDir path: "${params.outDir}/output/manta-strelka2", mode: "copy", pattern: '*[.strelka2.snv_indel.raw.vcf, .strelka2.snv_indel.pass.vcf]'
+  publishDir path: "${params.outDir}/output/manta-strelka2", mode: "copy", pattern: '*{.strelka2.snv_indel.raw.vcf, .strelka2.snv_indel.pass.vcf}'
 
   input:
   tuple val(caseID), val(sampleID), file(tumourbam), file(tumourbai), val(germlineID), file(germlinebam), file(germlinebai) from mantastrelka2ing
@@ -1201,7 +1201,7 @@ process lancet_filter {
   label 'med_mem'
 
   publishDir path: "$params.outDir/cases/$caseID/lancet"
-  publishDir path: "${params.outDir}/output/lancet", mode: "copy", pattern: '*.[raw.vcf, .lancet.snv_indel.pass.vcf]'
+  publishDir path: "${params.outDir}/output/lancet", mode: "copy", pattern: '*.{raw.vcf, lancet.snv_indel.pass.vcf}'
 
   input:
   tuple val(caseID), val(sampleID), file(mergevcf) from lancet_merge
