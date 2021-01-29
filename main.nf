@@ -56,7 +56,7 @@ if(!Channel.from(params.assembly, checkIfExists: true)){
 //Globals
 params.outDir = "batch_${params.seqLevel}/${params.runID}"
 params.seqlevel = "${params.seqLevel}".toLowerCase()
-
+params.facets = params.seqlevel == "exome" || "wgs" ? true : false
 //Reference data as value channels and reusable therefore
 reference = [
     grchvers: false,
