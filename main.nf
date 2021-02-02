@@ -1395,7 +1395,7 @@ process pcgrreport {
     fi
 
     if [[ \$PURITY != "NA" ]]; then
-      PURIT="--tumor_ppurity \$PURITY"
+      PURIT="--tumor_purity \$PURITY"
     else
       PURIT=""
     fi
