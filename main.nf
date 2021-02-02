@@ -1382,12 +1382,24 @@ process pcgrreport {
   script:
   caseID="${sampleID}".split("${params.tumourIDsplit}")[0]
   grch_vers = "${grchver}".split("\\/")[-1]
-  ploidy = ploidpur =~ "input." ? "" : "--tumor_ploidy \$(cut -f 1 ${ploidpur})"
-  purity = ploidpur =~ "input." ? "" : "--tumor_purity \$(cut -f 2 ${ploidpur})"
   jointseg = jointsegs =~ "input." ? "" : "--input_cna ${jointsegs}"
   config = params.seqlevel == "exome" || "panel" ? "${pcgrbase}/data/${grch_vers}/pcgr_configuration_${params.exomeTag}.toml" : "${pcgrbase}/data/${grch_vers}/pcgr_configuration_wgs.toml"
   """
   {
+    PLOIDY=\$(cut -f 1 ${ploidpur})
+    PURITY=\$(cut -f 2 ${ploidpur})
+    if [[ \$PLOIDY != "NA" ]]; then
+      PLOID="--tumor_ploidy \$PLOIDY"
+    else
+      PLOID=""
+    fi
+
+    if [[ \$PURITY != "NA" ]]; then
+      PURIT="--tumor_ppurity \$PURITY"
+    else
+      PURIT=""
+    fi
+
     ##PCGR 0.9.0rc
     pcgr.py \
       --pcgr_dir ${pcgrbase} \
@@ -1395,7 +1407,7 @@ process pcgrreport {
       --genome_assembly ${grch_vers} \
       --conf ${config} \
       --sample_id ${sampleID} \
-      --input_vcf ${vcf} ${jointseg} ${ploidy} ${purity} \
+      --input_vcf ${vcf} ${jointseg} \$PLOID \$PURIT \
       --no-docker \
       --force_overwrite \
       --no_vcf_validate
