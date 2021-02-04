@@ -1491,7 +1491,7 @@ process mltiQC {
 process somenone_software_vers {
 
   label 'low_mem'
-  publishDir "${params.baseDir}/pipeline_info", mode: 'copy'
+  publishDir "pipeline_info", mode: 'copy'
 
   output:
   file 'somenone_software_versions.yaml' into ch_somenone_software_vers
