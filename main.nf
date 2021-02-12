@@ -1410,7 +1410,11 @@ process pcgrreport {
       --input_vcf ${vcf} ${jointseg} \$PLOID \$PURIT \
       --no-docker \
       --force_overwrite \
-      --no_vcf_validate
+      --no_vcf_validate \
+      --estimate_tmb \
+      --tmb_algorithm nonsyn \
+      --estimate_msi_status \
+      --estimate_signatures
 
   } 2>&1 | tee > ${sampleID}.pcgr.log.txt
   """
