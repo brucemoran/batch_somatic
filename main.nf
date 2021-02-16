@@ -860,7 +860,8 @@ process fctcon {
 
   label 'med_mem'
 
-  publishDir "$params.outDir/combined/facets"
+  publishDir "$params.outDir/combined/facets", overwrite: 'true', mode: 'copy', pattern: "{*.CNA.*,!${params.runID}*}"
+  publishDir "$params.outDir/combined/facets/per_case", overwrite: 'true', mode: 'copy', pattern: "!{*.CNA.*,${params.runID}*}"
 
   input:
   file(filesn) from facets_consensusing.collect()
