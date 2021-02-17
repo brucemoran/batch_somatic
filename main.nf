@@ -892,6 +892,8 @@ process fctcon {
 //separate into per-case output for facets consensus outputs
 process pc_facets {
 
+  executor 'local'
+
   input:
   tuple val(sampleID), val(caseID) from facets_pc_comb
   tuple file(tsvs), file(rdats) from facets_pc
@@ -912,17 +914,19 @@ facets_pcs_comb
 //output per case facets
 process combout_facets {
 
+  executor 'local'
   publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
 
   input:
   tuple val(caseID), val(sampleID), file(datas) from facets_pcs_combd
 
   output:
-  file('*') into facets_pcs_done
+  file('out/*') into facets_pcs_done
 
   script:
   """
-  ls ${sampleID}*
+  mkdir out
+  cp ${sampleID}* ./out/
   """
 }
 
