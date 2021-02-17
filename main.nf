@@ -889,28 +889,15 @@ process fctcon {
     """
 }
 
-process facets_js_nms {
- input:
- file(js) from facets_pc_n.flatten()
-
- output:
- tuple val(sampleID), file(js) into facets_pc_n2
-
- script:
- sampleID = "${js.baseName}".split("\\.")[0]
- """
- """
-}
-
 //separate into per-case output for facets consensus outputs
 process pc_facets {
 
   input:
-  tuple val(sampleID), file(js) from facets_pc_n2
+  tuple val(caseID), val(sampleID) from facets_pc_comb
   tuple file(tsvs), file(rdats) from facets_pc
 
   output:
-  tuple val(sampleID), file("${sampleID}.facets.CNA.*.tsv"), file("${sampleID}.facets.CNA.*.RData") into facets_pcs_comb
+  tuple val(caseID), val(sampleID), file("${sampleID}.facets.CNA.*.tsv"), file("${sampleID}.facets.CNA.*.RData") into facets_pcs_comb
 
   script:
   """
@@ -919,10 +906,8 @@ process pc_facets {
 }
 
 facets_pc_comb
-  .join(facets_pcs_comb)
   .map { it -> tuple(it[1], it[0], it[2..-1]) }
   .set { facets_pcs_combd }
-  // .println { it }
 
 //output per case facets
 process combout_facets {
@@ -937,8 +922,7 @@ process combout_facets {
 
   script:
   """
-  echo ${sampleID}
-  ls -l
+  ls ${sampleID}*
   """
 }
 
