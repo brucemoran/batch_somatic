@@ -878,13 +878,13 @@ process fctcon {
 
   script:
   if( !params.cosmic )
-    outfiles = "facets.CNA.ENS.{tsv,RData}"
+    def outfiles = 'facets.CNA.ENS.{tsv,RData}'
     """
     { Rscript -e "somenone::facets_cna_consensus(\\"fit_cncf_jointsegs.tsv\\", \\"${dict}\\", \\"${params.runID}\\")"
     } 2>&1 | tee > facets_cons.log.txt
     """
   else
-    outfiles = "facets.CNA.{CGC,ENS}.{tsv,RData}"
+    def outfiles = 'facets.CNA.{CGC,ENS}.{tsv,RData}'
     """
     { Rscript -e "somenone::facets_cna_consensus(\\"fit_cncf_jointsegs.tsv\\", \\"${dict}\\", \\"${params.runID}\\", \\"${cosmicbed}\\")"
     } 2>&1 | tee > facets_cons.log.txt
