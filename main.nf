@@ -912,7 +912,7 @@ process pc_facets {
 }
 
 facets_pc_comb
-  .join(facets_pcs_comb)
+  .join(facets_pcs_comb, by: [0,1])
   .map { it -> tuple(it[0], it[1], it[2..-1]) }
   .set { facets_pcs_combd }
 
@@ -923,7 +923,7 @@ process combout_facets {
   publishDir "$params.outDir/cases/$caseID/facets"
 
   input:
-  tuple val(sampleID), val(caseID), file(datas) from facets_pcs_combd
+  tuple val(caseID), val(sampleID), file(datas) from facets_pcs_combd
 
   output:
   file('*') into facets_pcs_done
