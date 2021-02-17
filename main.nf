@@ -891,48 +891,48 @@ process fctcon {
 
 facets_pc_n
   .flatten()
-  .set { facets_pc_n2 }
+  .println { facets_pc_n2 }
 
 //separate into per-case output for facets consensus outputs
-process pc_facets {
-
-  input:
-  file(js) from facets_pc_n2
-  tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc_n
-
-  output:
-  tuple val(sampleID), file(js), file(enst), file(ensr), file(cgct), file(cgcr) into facets_pcs_comb
-
-  script:
-  sampleID = "${js}".split("\\.")[0]
-  """
-  ls -l *
-  ls ${sampleID}*
-  """
-}
-
-facets_pc_comb
-  .join(facets_pcs_comb)
-  .map { it -> tuple(it[0], it[1], it[2..-1]) }
-  .set { facets_pcs_combd }
-
-//output per case facets
-process combout_facets {
-
-  echo true
-  publishDir "$params.outDir/cases/$caseID/facets"
-
-  input:
-  tuple  val(caseID), val(sampleID), file(datas) from facets_pcs_combd
-
-  output:
-  file("*") into facets_pcs_done
-
-  script:
-  """
-  ls -l
-  """
-}
+// process pc_facets {
+//
+//   input:
+//   file(js) from facets_pc_n2
+//   tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc_n
+//
+//   output:
+//   tuple val(sampleID), file(js), file(enst), file(ensr), file(cgct), file(cgcr) into facets_pcs_comb
+//
+//   script:
+//   sampleID = "${js}".split("\\.")[0]
+//   """
+//   ls -l *
+//   ls ${sampleID}*
+//   """
+// }
+//
+// facets_pc_comb
+//   .join(facets_pcs_comb)
+//   .map { it -> tuple(it[0], it[1], it[2..-1]) }
+//   .set { facets_pcs_combd }
+//
+// //output per case facets
+// process combout_facets {
+//
+//   echo true
+//   publishDir "$params.outDir/cases/$caseID/facets"
+//
+//   input:
+//   tuple  val(caseID), val(sampleID), file(datas) from facets_pcs_combd
+//
+//   output:
+//   file("*") into facets_pcs_done
+//
+//   script:
+//   """
+//   ls -l
+//   """
+// }
 
 mutect2bedding = mutect2_bedding.flatten()
 mutect2somaticing
