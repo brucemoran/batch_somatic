@@ -889,53 +889,58 @@ process fctcon {
     """
 }
 
-facets_pc_n
-  .flatten()
-  .splitCsv(sep : '.')
-//  .set { facets_pc_n2 }
-  .println { it }
+process facets_js_nms {
+ input:
+ file(js) from facets_pc_n.flatten()
+
+ output:
+ tuple val(sampleID), file(js) from facets_pc_n2
+
+ script:
+ sampleID = "${js.baseName}".split("\\.")[0]
+ """
+ """
+}
 
 //separate into per-case output for facets consensus outputs
-// process pc_facets {
-//
-//   input:
-//   file(js) from facets_pc_n2
-//   tuple file(tsvs), file(rdats) from facets_pc
-//
-//   output:
-//   tuple val(sampleID), file("${sampleID}.facets.CNA.*.tsv"), file("${sampleID}.facets.CNA.*.RData") into facets_pcs_comb
-//
-//   script:
-//   sampleID = "${js.baseName}".split("\\.")[0]
-//   """
-//   ls -l *
-//   ls ${sampleID}*
-//   """
-// }
-//
-// facets_pc_comb
-//   .join(facets_pcs_comb)
-//   .map { it -> tuple(it[1], it[0], it[2..-1]) }
-//   .set { facets_pcs_combd }
-//   // .println { it }
-//
-// //output per case facets
-// process combout_facets {
-//
-//   publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
-//
-//   input:
-//   tuple val(caseID), val(sampleID), file(datas) from facets_pcs_combd
-//
-//   output:
-//   file('*') into facets_pcs_done
-//
-//   script:
-//   """
-//   echo ${sampleID}
-//   ls -l
-//   """
-//}
+process pc_facets {
+
+  input:
+  tuple val(sampleID), file(js) from facets_pc_n2
+  tuple file(tsvs), file(rdats) from facets_pc
+
+  output:
+  tuple val(sampleID), file("${sampleID}.facets.CNA.*.tsv"), file("${sampleID}.facets.CNA.*.RData") into facets_pcs_comb
+
+  script:
+  """
+  ls ${sampleID}*
+  """
+}
+
+facets_pc_comb
+  .join(facets_pcs_comb)
+  .map { it -> tuple(it[1], it[0], it[2..-1]) }
+  .set { facets_pcs_combd }
+  // .println { it }
+
+//output per case facets
+process combout_facets {
+
+  publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
+
+  input:
+  tuple val(caseID), val(sampleID), file(datas) from facets_pcs_combd
+
+  output:
+  file('*') into facets_pcs_done
+
+  script:
+  """
+  echo ${sampleID}
+  ls -l
+  """
+}
 
 mutect2bedding = mutect2_bedding.flatten()
 mutect2somaticing
