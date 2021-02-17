@@ -926,11 +926,11 @@ process combout_facets {
   tuple val(sampleID), val(caseID), file(datas) from facets_pcs_combd
 
   output:
-  file("${sampleID}.facets.CNA.*") into facets_pcs_done
+  file('*') into facets_pcs_done
 
   script:
   """
-  ls -l
+  ls -l ${sampleID}*
   """
 }
 
