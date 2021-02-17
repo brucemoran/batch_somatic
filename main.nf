@@ -893,35 +893,14 @@ process fctcon {
 process pc_facets {
 
   executor 'local'
+  publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
 
   input:
   tuple val(sampleID), val(caseID) from facets_pc_comb
   tuple file(tsvs), file(rdats) from facets_pc
 
   output:
-  tuple val(caseID), val(sampleID), file("${sampleID}.facets.CNA.*.tsv"), file("${sampleID}.facets.CNA.*.RData") into facets_pcs_comb
-
-  script:
-  """
-  ls ${sampleID}*
-  """
-}
-
-facets_pcs_comb
-  .map { it -> tuple(it[0], it[1], it[2..-1]) }
-  .set { facets_pcs_combd }
-
-//output per case facets
-process combout_facets {
-
-  executor 'local'
-  publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
-
-  input:
-  tuple val(caseID), val(sampleID), file(datas) from facets_pcs_combd
-
-  output:
-  file('out/*') into facets_pcs_done
+  file("out/*") into facets_pcs_out
 
   script:
   """
