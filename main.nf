@@ -870,7 +870,7 @@ process fctcon {
 
   output:
   file("${params.runID}.*") into facets_cons
-  tuple file('*{ENS,CGC}.tsv'), file('*{ENS,CGC}.RData') into facets_pc
+  tuple file('*.tsv'), file('*.RData') into facets_pc
   file('*.facets.CNA.jointsegs.tsv') into facets_pc_n
 
   when:
@@ -903,11 +903,12 @@ process pc_facets {
   tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc
 
   output:
-  tuple val(sampleID), file("${sampleID}.facets.CNA.jointsegs.tsv"), file("${sampleID}.*.tsv"), file("${sampleID}.*.RData") into facets_pcs_comb
+  tuple val(sampleID), file("${sampleID}.facets.CNA.jointsegs.tsv"), file("${sampleID}.facets.CNA.{CGC,ENS}.tsv"), file("${sampleID}.facets.CNA.{CGC,ENS}.RData") into facets_pcs_comb
 
   script:
   sampleID = "${js.baseName}".split("\\.")[0]
   """
+  ls -l *
   ls ${sampleID}*
   """
 }
@@ -932,7 +933,7 @@ process combout_facets {
 
   script:
   """
-  ls ${sampleID}*
+  ls ${sampleID}
   """
 }
 
