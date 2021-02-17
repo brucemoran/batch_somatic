@@ -891,7 +891,7 @@ process fctcon {
 
 facets_pc_n
   .flatten()
-  .println { facets_pc_n2 }
+  .set { facets_pc_n2 }
 
 //separate into per-case output for facets consensus outputs
 process pc_facets {
