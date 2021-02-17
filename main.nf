@@ -893,7 +893,7 @@ process fctcon {
 process pc_facets {
 
   input:
-  tuple val(caseID), val(sampleID) from facets_pc_comb
+  tuple val(sampleID), val(caseID) from facets_pc_comb
   tuple file(tsvs), file(rdats) from facets_pc
 
   output:
@@ -906,7 +906,7 @@ process pc_facets {
 }
 
 facets_pcs_comb
-  .map { it -> tuple(it[1], it[0], it[2..-1]) }
+  .map { it -> tuple(it[0], it[1], it[2..-1]) }
   .set { facets_pcs_combd }
 
 //output per case facets
