@@ -912,14 +912,14 @@ process pc_facets {
 }
 
 facets_pc_comb
-  .join(facets_pcs_comb, by: [0,1])
+  .join(facets_pcs_comb)
+  .groupTuple()
   .map { it -> tuple(it[0], it[1], it[2..-1]) }
   .set { facets_pcs_combd }
 
 //output per case facets
 process combout_facets {
 
-  echo true
   publishDir "$params.outDir/cases/$caseID/facets"
 
   input:
