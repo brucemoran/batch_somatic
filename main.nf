@@ -904,7 +904,7 @@ process pc_facets {
 
   script:
   """
-  mkdir out
+  mkdir facets
   cp ${sampleID}* facets/
   """
 }
