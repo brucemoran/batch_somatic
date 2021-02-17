@@ -833,6 +833,7 @@ process fctcsv {
   tuple file("${sampleID}.fit_cncf_jointsegs.tsv"), file("${sampleID}.fit_ploidy_purity.tsv") into facets_consensusing
   tuple val(sampleID), file("${sampleID}.cncf_jointsegs.pcgr.tsv"), file("${sampleID}.fit_ploidy_purity.pcgr.tsv") into facets_pcgr
   file("${sampleID}.facets.log.txt") into facets_log
+  tuple val(sampleID), val(caseID) into facets_pc_comb
 
   when:
   params.facets
@@ -861,7 +862,6 @@ process fctcon {
   label 'med_mem'
 
   publishDir "$params.outDir/combined/facets", overwrite: 'true', mode: 'copy', pattern: "${params.runID}*"
-  publishDir "$params.outDir/combined/facets/per_case", overwrite: 'true', mode: 'copy', pattern: "!${params.runID}*"
 
   input:
   file(filesn) from facets_consensusing.collect()
@@ -869,7 +869,8 @@ process fctcon {
   file(dict) from reference.dict
 
   output:
-  file('*') into complete_facets
+  file("${params.runID}.*") into facets_cons
+  tuple file("*.facets.CNA.jointsegs.tsv"), file("*.facets.ENS.CGC.tsv"), file("*.facets.CNA.ENS.RData"), file("*.facets.CNA.CGC.tsv"), file("*.facets.CNA.CGC.RData") into facets_pc
 
   when:
   params.facets
@@ -885,6 +886,46 @@ process fctcon {
     { Rscript -e "somenone::facets_cna_consensus(\\"fit_cncf_jointsegs.tsv\\", \\"${dict}\\", \\"${params.runID}\\", \\"${cosmicbed}\\")"
     } 2>&1 | tee > facets_cons.log.txt
     """
+}
+
+pc_facets
+  .map { it -> tuple(it[0], [it[1..-1]]) }
+  .set { pcs_facets}
+
+//separate into per-case output for facets consensus outputs
+process pc_facets {
+
+  input:
+  tuple file(jointsegs), file(dats) from pcs_facets
+
+  output:
+  tuple val(sampleID), file(jointsegs), file(dats) into comb_pc_facets
+
+  script:
+  def sampleID = "${jointsegs}".split("\\.")[0]
+  """
+  echo ${sampleID}
+  """
+}
+
+facets_pc_comb
+  .join(comb_pc_facets)
+  .set { pc_combd_facets }
+
+//output per case facets
+process combout_facets {
+
+  publishDir "$params.outDir/cases/$caseID/facets"
+
+  input:
+  tuple val(sampleID), val(caseID), file(jointsegs), file(dats) from pc_combd_facets
+
+  output:
+  file("*") into facets_pc_done
+
+  script:
+  """
+  """
 }
 
 mutect2bedding = mutect2_bedding.flatten()
