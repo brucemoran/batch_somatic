@@ -891,7 +891,7 @@ process fctcon {
 
 facets_pc_n
   .flatten()
-  .split("\\.")[0]
+  .splitCsv(sep : '.')
 //  .set { facets_pc_n2 }
   .println { it }
 
