@@ -894,7 +894,7 @@ process facets_js_nms {
  file(js) from facets_pc_n.flatten()
 
  output:
- tuple val(sampleID), file(js) from facets_pc_n2
+ tuple val(sampleID), file(js) into facets_pc_n2
 
  script:
  sampleID = "${js.baseName}".split("\\.")[0]
