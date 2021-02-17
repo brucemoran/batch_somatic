@@ -888,18 +888,18 @@ process fctcon {
     """
 }
 
-pc_facets
+facets_pc
   .map { it -> tuple(it[0], [it[1..-1]]) }
-  .set { pcs_facets}
+  .set { facets_pcs}
 
 //separate into per-case output for facets consensus outputs
 process pc_facets {
 
   input:
-  tuple file(jointsegs), file(dats) from pcs_facets
+  tuple file(jointsegs), file(dats) from facets_pcs
 
   output:
-  tuple val(sampleID), file(jointsegs), file(dats) into comb_pc_facets
+  tuple val(sampleID), file(jointsegs), file(dats) into facets_pcs_comb
 
   script:
   def sampleID = "${jointsegs}".split("\\.")[0]
@@ -909,8 +909,8 @@ process pc_facets {
 }
 
 facets_pc_comb
-  .join(comb_pc_facets)
-  .set { pc_combd_facets }
+  .join(facets_pcs_comb)
+  .set { facets_pcs_combd }
 
 //output per case facets
 process combout_facets {
@@ -918,10 +918,10 @@ process combout_facets {
   publishDir "$params.outDir/cases/$caseID/facets"
 
   input:
-  tuple val(sampleID), val(caseID), file(jointsegs), file(dats) from pc_combd_facets
+  tuple val(sampleID), val(caseID), file(jointsegs), file(dats) from facets_pcs_combd
 
   output:
-  file("*") into facets_pc_done
+  file("*") into facets_pcs_done
 
   script:
   """
