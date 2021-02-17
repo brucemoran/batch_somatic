@@ -893,11 +893,6 @@ facets_pc_n
   .flatten()
   .set { facets_pc_n2 }
 
-process nms {
- echo true
-
-}
-
 //separate into per-case output for facets consensus outputs
 process pc_facets {
 
