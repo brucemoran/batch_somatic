@@ -833,7 +833,7 @@ process fctcsv {
   tuple file("${sampleID}.fit_cncf_jointsegs.tsv"), file("${sampleID}.fit_ploidy_purity.tsv") into facets_consensusing
   tuple val(sampleID), file("${sampleID}.cncf_jointsegs.pcgr.tsv"), file("${sampleID}.fit_ploidy_purity.pcgr.tsv") into facets_pcgr
   file("${sampleID}.facets.log.txt") into facets_log
-  tuple val(caseID), val(sampleID) into facets_pc_comb
+  tuple val(sampleID), val(caseID) into facets_pc_comb
 
   when:
   params.facets
@@ -912,9 +912,9 @@ process pc_facets {
 }
 
 facets_pc_comb
-  .join(facets_pcs_comb)
+  .join(facets_pcs_comb, by: [0,1])
   .groupTuple()
-  .map { it -> tuple(it[0], it[1], it[2..-1]) }
+  .map { it -> tuple(it[1], it[0], it[2..-1]) }
   .set { facets_pcs_combd }
 
 //output per case facets
