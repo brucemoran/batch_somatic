@@ -905,7 +905,7 @@ process pc_facets {
   """
 }
 
-facets_pc_comb
+facets_pcs_comb
   .map { it -> tuple(it[1], it[0], it[2..-1]) }
   .set { facets_pcs_combd }
 
