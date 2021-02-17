@@ -902,7 +902,7 @@ process pc_facets {
   tuple val(sampleID), file(jointsegs), file(dats) into facets_pcs_comb
 
   script:
-  def sampleID = "${jointsegs}".split("\\.")[0]
+  sampleID = "${jointsegs}".split("\\.")[0]
   """
   echo ${sampleID}
   """
