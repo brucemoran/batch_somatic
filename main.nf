@@ -870,7 +870,8 @@ process fctcon {
 
   output:
   file("${params.runID}.*") into facets_cons
-  tuple file("*.facets.CNA.jointsegs.tsv"), file("*.facets.CNA.ENS.tsv"), file("*.facets.CNA.ENS.RData"), file("*.facets.CNA.CGC.tsv"), file("*.facets.CNA.CGC.RData") into facets_pc
+  tuple file("*.facets.CNA.ENS.tsv"), file("*.facets.CNA.ENS.RData"), file("*.facets.CNA.CGC.tsv"), file("*.facets.CNA.CGC.RData") into facets_pc
+  file("*.facets.CNA.jointsegs.tsv") into facets_pc_n
 
   when:
   params.facets
@@ -888,43 +889,53 @@ process fctcon {
     """
 }
 
-facets_pc
-  .map { it -> tuple(it[0], [it[1..-1]]) }
-  .set { facets_pcs}
+facets_pc_n
+  .flatten()
+  .set { facets_pc_n2 }
+
+process nms {
+ echo true
+
+}
 
 //separate into per-case output for facets consensus outputs
 process pc_facets {
 
   input:
-  tuple file(jointsegs), file(dats) from facets_pcs
+  file(js) from facets_pc_n2
+  tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc_n
 
   output:
-  tuple val(sampleID), file(jointsegs), file(dats) into facets_pcs_comb
+  tuple val(sampleID), file(js), file(enst), file(ensr), file(cgct), file(cgcr) into facets_pcs_comb
 
   script:
-  sampleID = "${jointsegs}".split("\\.")[0]
+  sampleID = "${js}".split("\\.")[0]
   """
-  echo ${sampleID}
+  ls -l *
+  ls ${sampleID}*
   """
 }
 
 facets_pc_comb
   .join(facets_pcs_comb)
+  .map { it -> tuple(it[0], it[1], it[2..-1]) }
   .set { facets_pcs_combd }
 
 //output per case facets
 process combout_facets {
 
+  echo true
   publishDir "$params.outDir/cases/$caseID/facets"
 
   input:
-  tuple val(sampleID), val(caseID), file(jointsegs), file(dats) from facets_pcs_combd
+  tuple  val(caseID), val(sampleID), file(datas) from facets_pcs_combd
 
   output:
   file("*") into facets_pcs_done
 
   script:
   """
+  ls -l
   """
 }
 
