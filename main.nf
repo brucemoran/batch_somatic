@@ -833,7 +833,7 @@ process fctcsv {
   tuple file("${sampleID}.fit_cncf_jointsegs.tsv"), file("${sampleID}.fit_ploidy_purity.tsv") into facets_consensusing
   tuple val(sampleID), file("${sampleID}.cncf_jointsegs.pcgr.tsv"), file("${sampleID}.fit_ploidy_purity.pcgr.tsv") into facets_pcgr
   file("${sampleID}.facets.log.txt") into facets_log
-  tuple val(sampleID), val(caseID) into facets_pc_comb
+  tuple val(caseID), val(sampleID) into facets_pc_comb
 
   when:
   params.facets
