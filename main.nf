@@ -898,7 +898,7 @@ process pc_facets {
 
   input:
   file(js) from facets_pc_n2
-  tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc_n
+  tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc
 
   output:
   tuple val(sampleID), file("${sampleID}.facets.CNA.jointsegs.tsv"), file("${sampleID}.facets.CNA.ENS.tsv"), file("${sampleID}.facets.CNA.ENS.RData"), file("${sampleID}.facets.CNA.CGC.tsv"), file("${sampleID}.facets.CNA.CGC.RData") into facets_pcs_comb
