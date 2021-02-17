@@ -914,24 +914,25 @@ process pc_facets {
 facets_pc_comb
   .join(facets_pcs_comb)
   .map { it -> tuple(it[1], it[0], it[2..-1]) }
-  //.set { facets_pcs_combd }
-  .println { it }
+  .set { facets_pcs_combd }
+  // .println { it }
+
 //output per case facets
-// process combout_facets {
-//
-//   publishDir "$params.outDir/cases/$caseID/facets"
-//
-//   input:
-//   tuple val(caseID), val(sampleID), file(datas) from facets_pcs_combd
-//
-//   output:
-//   file('*') into facets_pcs_done
-//
-//   script:
-//   """
-//   ls -l ${sampleID}*
-//   """
-// }
+process combout_facets {
+
+  publishDir "$params.outDir/cases/$caseID/facets"
+
+  input:
+  tuple val(caseID), val(sampleID), file(datas) from facets_pcs_combd
+
+  output:
+  file('*') into facets_pcs_done
+
+  script:
+  """
+  echo ${sampleID}
+  """
+}
 
 mutect2bedding = mutect2_bedding.flatten()
 mutect2somaticing
