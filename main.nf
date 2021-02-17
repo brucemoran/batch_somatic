@@ -870,7 +870,7 @@ process fctcon {
 
   output:
   file("${params.runID}.*") into facets_cons
-  tuple file('*.tsv'), file('*.RData') into facets_pc
+  file("*${outfiles}") into facets_pc
   file('*.facets.CNA.jointsegs.tsv') into facets_pc_n
 
   when:
@@ -878,11 +878,13 @@ process fctcon {
 
   script:
   if( !params.cosmic )
+    outfiles = "facets.CNA.ENS.{tsv,RData}"
     """
     { Rscript -e "somenone::facets_cna_consensus(\\"fit_cncf_jointsegs.tsv\\", \\"${dict}\\", \\"${params.runID}\\")"
     } 2>&1 | tee > facets_cons.log.txt
     """
   else
+    outfiles = "facets.CNA.{CGC,ENS}.{tsv,RData}"
     """
     { Rscript -e "somenone::facets_cna_consensus(\\"fit_cncf_jointsegs.tsv\\", \\"${dict}\\", \\"${params.runID}\\", \\"${cosmicbed}\\")"
     } 2>&1 | tee > facets_cons.log.txt
@@ -896,14 +898,12 @@ facets_pc_n
 //separate into per-case output for facets consensus outputs
 process pc_facets {
 
-  executor 'local'
-
   input:
   file(js) from facets_pc_n2
-  tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc
+  file(ffils) from facets_pc
 
   output:
-  tuple val(sampleID), file("${sampleID}.facets.CNA.jointsegs.tsv"), file("${sampleID}.facets.CNA.{CGC,ENS}.tsv"), file("${sampleID}.facets.CNA.{CGC,ENS}.RData") into facets_pcs_comb
+  tuple val(sampleID), file(js), file("${sampleID}.facets.CNA.{CGC,ENS}.{tsv,RData}") into facets_pcs_comb
 
   script:
   sampleID = "${js.baseName}".split("\\.")[0]
@@ -922,7 +922,6 @@ facets_pc_comb
 //output per case facets
 process combout_facets {
 
-  executor 'local'
   publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
 
   input:
@@ -933,7 +932,8 @@ process combout_facets {
 
   script:
   """
-  ls ${sampleID}
+  echo ${sampleID}
+  ls -l
   """
 }
 
