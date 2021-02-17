@@ -896,6 +896,8 @@ facets_pc_n
 //separate into per-case output for facets consensus outputs
 process pc_facets {
 
+  executor 'local'
+
   input:
   file(js) from facets_pc_n2
   tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc
@@ -920,7 +922,8 @@ facets_pc_comb
 //output per case facets
 process combout_facets {
 
-  publishDir "$params.outDir/cases/$caseID/facets"
+  executor 'local'
+  publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
 
   input:
   tuple val(caseID), val(sampleID), file(datas) from facets_pcs_combd
@@ -931,7 +934,7 @@ process combout_facets {
   script:
   """
   echo ${sampleID}
-  ls -l 
+  ls -l
   """
 }
 
