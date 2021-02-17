@@ -891,9 +891,9 @@ process fctcon {
 
 facets_pc_n
   .flatten()
-  .println { it }
+  .println { facets_pc_n2 }
 
-separate into per-case output for facets consensus outputs
+//separate into per-case output for facets consensus outputs
 process pc_facets {
 
   input:
@@ -901,7 +901,7 @@ process pc_facets {
   tuple file(enst), file(ensr), file(cgct), file(cgcr) from facets_pc_n
 
   output:
-  tuple val(sampleID), file(js), file(enst), file(ensr), file(cgct), file(cgcr) into facets_pcs_comb
+  tuple val(sampleID), file("${sampleID}.facets.CNA.jointsegs.tsv"), tuple file("${sampleID}.facets.CNA.ENS.tsv"), file("${sampleID}.facets.CNA.ENS.RData"), file("${sampleID}.facets.CNA.CGC.tsv"), file("${sampleID}.facets.CNA.CGC.RData") into facets_pcs_comb
 
   script:
   sampleID = "${js.baseName}".split("\\.")[0]
