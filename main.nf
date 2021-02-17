@@ -931,6 +931,7 @@ process combout_facets {
   script:
   """
   echo ${sampleID}
+  ls -l 
   """
 }
 
