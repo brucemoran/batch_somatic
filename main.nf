@@ -870,7 +870,7 @@ process fctcon {
 
   output:
   file("${params.runID}.*") into facets_cons
-  tuple file('*.tsv'), file('*.RData') into facets_pc
+  tuple file('*{ENS,CGC}.tsv'), file('*{ENS,CGC}.RData') into facets_pc
   file('*.facets.CNA.jointsegs.tsv') into facets_pc_n
 
   when:
