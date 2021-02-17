@@ -923,7 +923,7 @@ process combout_facets {
   publishDir "$params.outDir/cases/$caseID/facets"
 
   input:
-  tuple  val(caseID), val(sampleID), file(datas) from facets_pcs_combd
+  tuple val(sampleID), val(caseID), file(datas) from facets_pcs_combd
 
   output:
   file("${sampleID}.facets.CNA.*") into facets_pcs_done
