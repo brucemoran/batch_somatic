@@ -823,7 +823,7 @@ process fctcsv {
 
   label 'med_mem'
 
-  publishDir "$params.outDir/cases/$caseID/facets"
+  publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
 
   input:
   tuple val(caseID), val(sampleID), file(tumourbam), file(tumourbai), val(germlineID), file(germlinebam), file(germlinebai) from facetsomaing
@@ -893,19 +893,19 @@ process fctcon {
 process pc_facets {
 
   executor 'local'
-  publishDir "$params.outDir/cases/$caseID/facets", mode: 'copy', overwrite: 'true'
+  publishDir "$params.outDir/cases/$caseID", mode: 'copy', overwrite: 'true'
 
   input:
   tuple val(sampleID), val(caseID) from facets_pc_comb
   tuple file(tsvs), file(rdats) from facets_pc
 
   output:
-  file("out/*") into facets_pcs_out
+  file("facets/*") into facets_pcs_out
 
   script:
   """
   mkdir out
-  cp ${sampleID}* ./out/
+  cp ${sampleID}* facets/
   """
 }
 
