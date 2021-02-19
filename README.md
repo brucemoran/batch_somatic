@@ -4,7 +4,7 @@
 #### Dependencies:
 [NextFlow](https://www.nextflow.io/index.html#GetStarted), [Singularity](https://sylabs.io/guides/3.0/user-guide/installation.html#)
 #### Reference Generation:
-See [somatic_n-of-1 repo's download-references.nf](https://github.com/brucemoran/somatic_n-of-1/blob/master/download-references.nf)
+See [somatic_n-of-1 repo's download-references.nf](https://github.com/brucemoran/somatic_n-of-1/tree/dev)
 ### Batch Somatic-Germline Pipeline
 #### About the pipeline:
 This pipeline was developed to analyse and report on clinical research. To this end we have tried to make a useful and readable output. This has been achieved largely on the back of [PCGR](https://github.com/sigven/pcgr)/[CPSR](https://github.com/sigven/cpsr) which provide really excellent HTML reports and annotation from multiple clinically relevant sources.
