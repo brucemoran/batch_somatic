@@ -9,6 +9,7 @@ See [somatic_n-of-1 repo's download-references.nf](https://github.com/brucemoran
 #### About the pipeline:
 This pipeline was developed to analyse and report on clinical research. To this end we have tried to make a useful and readable output. This has been achieved largely on the back of [PCGR](https://github.com/sigven/pcgr)/[CPSR](https://github.com/sigven/cpsr) which provide really excellent HTML reports and annotation from multiple clinically relevant sources.
 
+
 Variant calling uses an 'ensemble' approach with 3 callers (MuTect2, Manta/Strelka2 and Lancet) currently. More may be added in the future. The outputs are combined using our [somaticVariantConsensus](https://github.com/brucemoran/somaticVariantConsensus) method. This takes parsed VCF output and combines calls, requiring support from at least 2 callers. It also parses 'raw' (unfiltered) calls, testing those variants that do not have support from 2 callers to see if they are contained in any single callers filtered VCF. In this way we attempt to retain as much true-positive calls as possible.
 #### To run the pipeline:
 ```
