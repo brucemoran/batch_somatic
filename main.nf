@@ -10,22 +10,37 @@ def helpMessage() {
   nextflow run brucemoran/batch_somatic
 
   Mandatory arguments:
+
     -profile        [str]       Configuration profile (required: standard,singularity)
-    --sampleCsv      STRING      CSV format, headers: caseID, soma_sampleID, soma_read1, soma_read2, germ_sampleID, germ_read1, germ_read2'
+
+    --sampleCsv     [str]       CSV format, headers: caseID, soma_sampleID, soma_read1, soma_read2, germ_sampleID, germ_read1, germ_read2'
+
     --runID         [str]       Name for run, used to tag outputs
+
     --refDir        [file]      Path of dir in which reference data are held; this should be created by download-references.nf and contain dir <assembly>
+
     --assembly      [str]       Either GRCh37 or GRCh38 (default), as per download-references.nf
 
   General Optional Arguments:
+
     --germline      [bool]      Run HaplotypeCaller on germline sample and annotate with CPSR (default: true)
+
     --scatGath      [int]       Number of pieces to divide intervalList into for scattering to variant calling processes (default: 20 for exome, 100 for WGS)
+
     --incOrder      [str]       In final plots, use this ordering of samples (if multiple somatic samples); comma-separated, no spaces (default: alphanumeric sort)4
+
     --multiqcConfig [str]       Config file for multiqc (default: bin/somatic_n-of-1.multiQC_config.yaml)
+
     --seqLevel      [str]       WGS, exome or panel (default: WGS)
+
     --exomeTag      [str]       Tag used for exome (or panel) kit when running download-references.nf
+
     --cosmic        [bool]      set this to specify output of COSMIC CGC genes only (somatic only; based on download and supply of CGC file in download_references.nf)
+
     --impacts       [str]       'IMPACTS from VEP to use, comma-separated one or set of HIGH, MODERATE, MODIFIER, LOW; multiple sets can be input separating by semi-colon (default: "HIGH,MODERATE,MODIFIER,LOW")'
+
     --agilentUMI   [bool]      set this to process reads using a UMI supplied in sampleCsv by adding 'soma_umi' and 'germ_umi' after 'soma', 'germ' read paths and supplying path to UMI fastq ; NB this bypasses bbduk, picard markDuplicates
+
     --agilentLib   [str]      which of 'halo, (haloplex)hs, (sureselect)xt (default), (sureselect xt hs2) v2, (sureselect)qxt' were used to design and prep libraries
     """.stripIndent()
 }
