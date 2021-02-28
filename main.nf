@@ -1424,21 +1424,26 @@ process pcgrreport {
   config = params.seqlevel == "exome" || "panel" ? "${pcgrbase}/data/${grch_vers}/pcgr_configuration_${params.exomeTag}.toml" : "${pcgrbase}/data/${grch_vers}/pcgr_configuration_wgs.toml"
   """
   {
-    PLOIDY=\$(cut -f 1 ${ploidpur})
-    PURITY=\$(cut -f 2 ${ploidpur})
-    if [[ \$PLOIDY != "NA" ]]; then
-      PLOID="--tumor_ploidy \$PLOIDY"
+    if [[ ${params.seqlevel} != "panel" ]]; then
+      PLOIDY=\$(cut -f 1 ${ploidpur})
+      PURITY=\$(cut -f 2 ${ploidpur})
+      if [[ \$PLOIDY != "NA" ]]; then
+        PLOID="--tumor_ploidy \$PLOIDY"
+      else
+        PLOID=""
+      fi
+
+      if [[ \$PURITY != "NA" ]]; then
+        PURIT="--tumor_purity \$PURITY"
+      else
+        PURIT=""
+      fi
     else
       PLOID=""
-    fi
-
-    if [[ \$PURITY != "NA" ]]; then
-      PURIT="--tumor_purity \$PURITY"
-    else
       PURIT=""
     fi
-
-    ##PCGR 0.9.0rc
+    
+    ##PCGR 0.9.1
     pcgr.py \
       --pcgr_dir ${pcgrbase} \
       --output_dir ./ \
