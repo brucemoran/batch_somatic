@@ -1442,7 +1442,7 @@ process pcgrreport {
       PLOID=""
       PURIT=""
     fi
-    
+
     ##PCGR 0.9.1
     pcgr.py \
       --pcgr_dir ${pcgrbase} \
