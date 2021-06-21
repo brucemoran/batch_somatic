@@ -39,9 +39,11 @@ def helpMessage() {
 
     --impacts       [str]       'IMPACTS from VEP to use, comma-separated one or set of HIGH, MODERATE, MODIFIER, LOW; multiple sets can be input separating by semi-colon (default: "HIGH,MODERATE,MODIFIER,LOW")'
 
-    --agilentUMI   [bool]      set this to process reads using a UMI supplied in sampleCsv by adding 'soma_umi' and 'germ_umi' after 'soma', 'germ' read paths and supplying path to UMI fastq ; NB this bypasses bbduk, picard markDuplicates
+    --agilentUMI    [bool]      set this to process reads using a UMI supplied in sampleCsv by adding 'soma_umi' and 'germ_umi' after 'soma', 'germ' read paths and supplying path to UMI fastq ; NB this bypasses bbduk, picard markDuplicates
 
-    --agilentLib   [str]      which of 'halo, (haloplex)hs, (sureselect)xt (default), (sureselect xt hs2) v2, (sureselect)qxt' were used to design and prep libraries
+    --agilentLib    [str]      which of 'halo, (haloplex)hs, (sureselect)xt (default), (sureselect xt hs2) v2, (sureselect)qxt' were used to design and prep libraries
+
+    --nocram        [bool]     do not make CRAM files of BAMs post-alignment
     """.stripIndent()
 }
 
@@ -343,6 +345,9 @@ process cram {
 
   output:
   tuple file("${sampleID}.sort.cram"), file("${sampleID}.sort.cram.crai") into completedcram
+
+  when:
+  params.nocram != false
 
   script:
   """
