@@ -44,6 +44,8 @@ def helpMessage() {
     --agilentLib    [str]      which of 'halo, (haloplex)hs, (sureselect)xt (default), (sureselect xt hs2) v2, (sureselect)qxt' were used to design and prep libraries
 
     --nocram        [bool]     do not make CRAM files of BAMs post-alignment
+
+    --nometrics     [bool]     do not run metrics
     """.stripIndent()
 }
 
@@ -796,6 +798,9 @@ process mltmet {
 
   output:
   file('*.txt') into multimetrics_multiqc
+
+  when:
+  params.nometrics != true
 
   script:
   def taskmem = task.memory == null ? "" : "-Xmx" + javaTaskmem("${task.memory}")
