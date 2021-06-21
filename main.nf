@@ -347,7 +347,7 @@ process cram {
   tuple file("${sampleID}.sort.cram"), file("${sampleID}.sort.cram.crai") into completedcram
 
   when:
-  params.nocram != false
+  params.nocram != true
 
   script:
   """
