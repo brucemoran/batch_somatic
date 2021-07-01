@@ -876,9 +876,18 @@ process fctcsv {
       ${germlinebam} \
       ${tumourbam}
 
-    Rscript -e "somenone::facets_cna_call(\\"${sampleID}.facets.r10.csv\\")"
+    LINES=\$(wc -l ${sampleID}.facets.r10.csv | perl -ane 'print \$F[0];')
+
+    if [[ \$LINES > 1 ]]; then
+      Rscript -e "somenone::facets_cna_call(\\"${sampleID}.facets.r10.csv\\")"
+    else
+      echo -e "PLOIDY\\tPURITY\\n2\\tNA" > ${sampleID}.fit_ploidy_purity.tsv
+      echo -e "chrom\\tseg\\tnum.mark\\tnhet\\tcnlr.median\\tmafR\\tsegclust\\tcnlr.median.clust\\tmafR.clust\\tstart\\tend\\tcf.em\\ttcn.em\\tlcn.em" > ${sampleID}.fit_cncf_jointsegs.tsv
+      echo -e "Chromosome\\tStart\\tEnd\\tSegment_Mean" > ${sampleID}.cncf_jointsegs.pcgr.tsv
+    fi
 
     tail -n+2 ${sampleID}.fit_ploidy_purity.tsv > ${sampleID}.fit_ploidy_purity.pcgr.tsv
+
   } 2>&1 | tee > ${sampleID}.facets.log.txt
   """
 }
