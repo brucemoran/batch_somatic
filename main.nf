@@ -37,6 +37,8 @@ def helpMessage() {
 
     --cosmic        [bool]      set this to specify output of COSMIC CGC genes only (somatic only; based on download and supply of CGC file in download_references.nf)
 
+    --facets        [bool]      run CNA analysis (also used for ploidy/purity estimation so required for PCGR)
+
     --impacts       [str]       'IMPACTS from VEP to use, comma-separated one or set of HIGH, MODERATE, MODIFIER, LOW; multiple sets can be input separating by semi-colon (default: "HIGH,MODERATE,MODIFIER,LOW")'
 
     --agilentUMI    [bool]      set this to process reads using a UMI supplied in sampleCsv by adding 'soma_umi' and 'germ_umi' after 'soma', 'germ' read paths and supplying path to UMI fastq ; NB this bypasses bbduk, picard markDuplicates
