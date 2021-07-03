@@ -1540,7 +1540,7 @@ if( !params.pcgr ){
 
     script:
     """
-    ls
+    ls $vcf
     """
 
   }
