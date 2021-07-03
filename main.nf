@@ -1536,10 +1536,11 @@ if( !params.pcgr ){
     file(vcf) from vcfs_pcgr
 
     output:
-    file("${sampleID}.${params.runID}.HMML_impacts.pcgr.tsv.vcf") into madetrsv
+    file("${sampleID}.*.HMML_impacts.pcgr.tsv.vcf") into madetrsv
 
     script:
     """
+    ls
     """
 
   }
