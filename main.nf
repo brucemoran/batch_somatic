@@ -1536,7 +1536,7 @@ if( !params.pcgr ){
     file(vcf) from vcfs_pcgr
 
     output:
-    file("${sampleID}.${params.runID}.HMML_impacts.pcgr.tsv.vcf") into madetsv
+    file("${sampleID}.${params.runID}.HMML_impacts.pcgr.tsv.vcf") into madetrsv
 
     script:
     """
@@ -1551,10 +1551,10 @@ if( !params.pcgr ){
     publishDir path: "${params.outDir}/combined/HMML_impact", mode: "copy"
 
     input:
-    file(vcf) from madetsv.collect()
+    file(vcf) from madetrsv.collect()
 
     output:
-    file("${sampleID}.${params.runID}.HMML_impacts.combined.tab.vcf.tsv") into madetsv2
+    file("${sampleID}.${params.runID}.HMML_impacts.combined.tab.vcf.tsv") into madetrsv2
 
     script:
     """
