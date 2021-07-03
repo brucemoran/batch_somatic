@@ -1536,11 +1536,13 @@ if( !params.pcgr ){
     file(vcf) from vcfs_pcgr
 
     output:
-    file("*.HMML_impacts.pcgr.tsv.vcf") into madetrsv
+    file(vcf) into madetrsv
+
+    when:
+    vcf =~ '*.HMML_impacts.pcgr.tsv.vcf'
 
     script:
     """
-    ls $vcf
     """
 
   }
@@ -1555,11 +1557,11 @@ if( !params.pcgr ){
     file(vcf) from madetrsv.collect()
 
     output:
-    file("${sampleID}.${params.runID}.HMML_impacts.combined.tab.vcf.tsv") into madetrsv2
+    file("${params.runID}.HMML_impacts.combined.tab.vcf.tsv") into madetrsv2
 
     script:
     """
-    perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${sampleID}.${params.runID}.HMML_impacts.combined"
+    perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${params.runID}.HMML_impacts.combined"
     """
   }
 }
