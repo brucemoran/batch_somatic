@@ -1544,7 +1544,7 @@ if( !params.pcgr ){
 
   }
 
-  process vepSomtsv {
+  process vep_hmml_tsv {
 
     label 'low_mem'
 
