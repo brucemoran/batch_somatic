@@ -1536,7 +1536,7 @@ if( !params.pcgr ){
     file(vcf) from vcfs_pcgr
 
     output:
-    file("${sampleID}.*.HMML_impacts.pcgr.tsv.vcf") into madetrsv
+    file("*.HMML_impacts.pcgr.tsv.vcf") into madetrsv
 
     script:
     """
