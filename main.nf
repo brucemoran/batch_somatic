@@ -39,6 +39,8 @@ def helpMessage() {
 
     --facets        [bool]      run CNA analysis (also used for ploidy/purity estimation so required for PCGR)
 
+    --pcgr          [bool]      run PCGR reporting (NB requires facets)
+
     --impacts       [str]       'IMPACTS from VEP to use, comma-separated one or set of HIGH, MODERATE, MODIFIER, LOW; multiple sets can be input separating by semi-colon (default: "HIGH,MODERATE,MODIFIER,LOW")'
 
     --agilentUMI    [bool]      set this to process reads using a UMI supplied in sampleCsv by adding 'soma_umi' and 'germ_umi' after 'soma', 'germ' read paths and supplying path to UMI fastq ; NB this bypasses bbduk, picard markDuplicates
@@ -1385,141 +1387,143 @@ process vcfGRa {
 }
 
 // 3.2 Create VCF for PCGR from consensus
-process pcgrVcf {
+if( params.pcgr ){
+  process pcgrVcf {
 
-  label 'low_mem'
+    label 'low_mem'
 
-  input:
-  tuple val(caseID), val(sampleID), file(cons_vcf) from vcfs_pcgr
+    input:
+    tuple val(caseID), val(sampleID), file(cons_vcf) from vcfs_pcgr
 
-  output:
-  tuple val(sampleID), file("${pcgr_vcf}") into snvpass_pcgr
+    output:
+    tuple val(sampleID), file("${pcgr_vcf}") into snvpass_pcgr
 
-  when:
-  cons_vcf =~ "${sampleID}.${params.runID}.HMML_impacts.pcgr.tsv.vcf"
+    when:
+    cons_vcf =~ "${sampleID}.${params.runID}.HMML_impacts.pcgr.tsv.vcf"
 
-  script:
-  pcgr_vcf = "${cons_vcf}".replace("pcgr.tsv.vcf", "snv_indel.pass.pcgr.vcf")
-  """
-  cat ${workflow.projectDir}/assets/vcf42.head.txt > $pcgr_vcf
-  head -n1 $cons_vcf >> $pcgr_vcf
-  tail -n+2 $cons_vcf | sort -V >> $pcgr_vcf
-  """
-}
+    script:
+    pcgr_vcf = "${cons_vcf}".replace("pcgr.tsv.vcf", "snv_indel.pass.pcgr.vcf")
+    """
+    cat ${workflow.projectDir}/assets/vcf42.head.txt > $pcgr_vcf
+    head -n1 $cons_vcf >> $pcgr_vcf
+    tail -n+2 $cons_vcf | sort -V >> $pcgr_vcf
+    """
+  }
 
-if(params.facets){
-  snvpass_pcgr
-    .join(facets_pcgr)
-    .map { it -> [it[0], it[1], it[2], it[3]] }
-    .set { pcgr_inputs }
-}
-if(! params.facets){
-  snvpass_pcgr
-    .map { it -> [it[0], it[1], null, null] }
-    .set { pcgr_inputs }
-}
+  if(params.facets){
+    snvpass_pcgr
+      .join(facets_pcgr)
+      .map { it -> [it[0], it[1], it[2], it[3]] }
+      .set { pcgr_inputs }
+  }
+  if(! params.facets){
+    snvpass_pcgr
+      .map { it -> [it[0], it[1], null, null] }
+      .set { pcgr_inputs }
+  }
 
-/* 3.3 PCGR report
-* take all mutations in consensus.tab from pass.vcfs into single VCF for PCGR
-*/
-process pcgrreport {
+  /* 3.3 PCGR report
+  * take all mutations in consensus.tab from pass.vcfs into single VCF for PCGR
+  */
+  process pcgrreport {
 
-  label 'low_mem'
+    label 'low_mem'
 
-  publishDir "${params.outDir}/reports/pcgr", mode: "copy", pattern: "*html"
-  publishDir "${params.outDir}/cases/${caseID}/pcgr", mode: "copy"
+    publishDir "${params.outDir}/reports/pcgr", mode: "copy", pattern: "*html"
+    publishDir "${params.outDir}/cases/${caseID}/pcgr", mode: "copy"
 
-  input:
-  tuple val(sampleID), file(vcf), file(jointsegs), file(ploidpur) from pcgr_inputs
-  file(grchver) from reference.grchvers
-  file(pcgrbase) from reference.pcgrbase
+    input:
+    tuple val(sampleID), file(vcf), file(jointsegs), file(ploidpur) from pcgr_inputs
+    file(grchver) from reference.grchvers
+    file(pcgrbase) from reference.pcgrbase
 
-  output:
-  file('*') into completedPCGR
-  tuple val(sampleID), file(vcf), file("${sampleID}.pcgr_acmg.grch38.pass.vcf.gz") into cons_comb_pcgr
+    output:
+    file('*') into completedPCGR
+    tuple val(sampleID), file(vcf), file("${sampleID}.pcgr_acmg.grch38.pass.vcf.gz") into cons_comb_pcgr
 
-  script:
-  caseID="${sampleID}".split("${params.tumourIDsplit}")[0]
-  grch_vers = "${grchver}".split("\\/")[-1]
-  jointseg = jointsegs =~ "input." ? "" : "--input_cna ${jointsegs}"
-  config = params.seqlevel == "exome" || "panel" ? "${pcgrbase}/data/${grch_vers}/pcgr_configuration_${params.exomeTag}.toml" : "${pcgrbase}/data/${grch_vers}/pcgr_configuration_wgs.toml"
-  """
-  {
-    if [[ ${params.seqlevel} != "panel" ]]; then
-      PLOIDY=\$(cut -f 1 ${ploidpur})
-      PURITY=\$(cut -f 2 ${ploidpur})
-      if [[ \$PLOIDY != "NA" ]]; then
-        PLOID="--tumor_ploidy \$PLOIDY"
+    script:
+    caseID="${sampleID}".split("${params.tumourIDsplit}")[0]
+    grch_vers = "${grchver}".split("\\/")[-1]
+    jointseg = jointsegs =~ "input." ? "" : "--input_cna ${jointsegs}"
+    config = params.seqlevel == "exome" || "panel" ? "${pcgrbase}/data/${grch_vers}/pcgr_configuration_${params.exomeTag}.toml" : "${pcgrbase}/data/${grch_vers}/pcgr_configuration_wgs.toml"
+    """
+    {
+      if [[ ${params.seqlevel} != "panel" ]]; then
+        PLOIDY=\$(cut -f 1 ${ploidpur})
+        PURITY=\$(cut -f 2 ${ploidpur})
+        if [[ \$PLOIDY != "NA" ]]; then
+          PLOID="--tumor_ploidy \$PLOIDY"
+        else
+          PLOID=""
+        fi
+
+        if [[ \$PURITY != "NA" ]]; then
+          PURIT="--tumor_purity \$PURITY"
+        else
+          PURIT=""
+        fi
       else
         PLOID=""
-      fi
-
-      if [[ \$PURITY != "NA" ]]; then
-        PURIT="--tumor_purity \$PURITY"
-      else
         PURIT=""
       fi
-    else
-      PLOID=""
-      PURIT=""
-    fi
 
-    ##PCGR 0.9.1
-    pcgr.py \
-      --pcgr_dir ${pcgrbase} \
-      --output_dir ./ \
-      --genome_assembly ${grch_vers} \
-      --conf ${config} \
-      --sample_id ${sampleID} \
-      --input_vcf ${vcf} ${jointseg} \$PLOID \$PURIT \
-      --no-docker \
-      --force_overwrite \
-      --no_vcf_validate \
-      --estimate_tmb \
-      --tmb_algorithm nonsyn \
-      --estimate_msi_status \
-      --estimate_signatures
+      ##PCGR 0.9.1
+      pcgr.py \
+        --pcgr_dir ${pcgrbase} \
+        --output_dir ./ \
+        --genome_assembly ${grch_vers} \
+        --conf ${config} \
+        --sample_id ${sampleID} \
+        --input_vcf ${vcf} ${jointseg} \$PLOID \$PURIT \
+        --no-docker \
+        --force_overwrite \
+        --no_vcf_validate \
+        --estimate_tmb \
+        --tmb_algorithm nonsyn \
+        --estimate_msi_status \
+        --estimate_signatures
 
-  } 2>&1 | tee > ${sampleID}.pcgr.log.txt
-  """
-}
+    } 2>&1 | tee > ${sampleID}.pcgr.log.txt
+    """
+  }
 
-//  3.4 PCGR + consensus VCF to make a good VCF for combining
-process prepvepSomtsv {
+  //  3.4 PCGR + consensus VCF to make a good VCF for combining
+  process prepvepSomtsv {
 
-  label 'low_mem'
+    label 'low_mem'
 
-  input:
-  tuple val(sampleID), file(vcf), file(vep) from cons_comb_pcgr
+    input:
+    tuple val(sampleID), file(vcf), file(vep) from cons_comb_pcgr
 
-  output:
-  file("${sampleID}.${params.runID}.combine.vcf") into vep_som_tsv
+    output:
+    file("${sampleID}.${params.runID}.combine.vcf") into vep_som_tsv
 
-  script:
-  """
-  perl ${workflow.projectDir}/bin/combine_select_elements.pl \
-    $vep \
-    $vcf \
-    ${sampleID}.${params.runID}.combine.vcf
-  """
-}
+    script:
+    """
+    perl ${workflow.projectDir}/bin/combine_select_elements.pl \
+      $vep \
+      $vcf \
+      ${sampleID}.${params.runID}.combine.vcf
+    """
+  }
 
-process vepSomtsv {
+  process vepSomtsv {
 
-  label 'low_mem'
+    label 'low_mem'
 
-  publishDir path: "${params.outDir}/combined/consensus_variants", mode: "copy"
+    publishDir path: "${params.outDir}/combined/consensus_variants", mode: "copy"
 
-  input:
-  file(vcf) from vep_som_tsv.collect()
+    input:
+    file(vcf) from vep_som_tsv.collect()
 
-  output:
-  file("${params.runID}.consensus_variants.tab.vcf.tsv") into madetsv2
+    output:
+    file("${params.runID}.consensus_variants.tab.vcf.tsv") into madetsv2
 
-  script:
-  """
-  perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${params.runID}.consensus_variants"
-  """
+    script:
+    """
+    perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${params.runID}.consensus_variants"
+    """
+  }
 }
 
 /*
