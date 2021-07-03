@@ -1526,6 +1526,42 @@ if( params.pcgr ){
   }
 }
 
+if( !params.pcgr ){
+
+  process hmml_filt {
+
+    label 'low_mem'
+
+    input:
+    file(vcf) from vcfs_pcgr
+
+    output:
+    file("${sampleID}.${params.runID}.HMML_impacts.pcgr.tsv.vcf") into madetsv
+
+    script:
+    """
+    """
+
+  }
+
+  process vepSomtsv {
+
+    label 'low_mem'
+
+    publishDir path: "${params.outDir}/combined/HMML_impact", mode: "copy"
+
+    input:
+    file(vcf) from madetsv.collect()
+
+    output:
+    file("${sampleID}.${params.runID}.HMML_impacts.combined.tab.vcf.tsv") into madetsv2
+
+    script:
+    """
+    perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${sampleID}.${params.runID}.HMML_impacts.combined"
+    """
+  }
+}
 /*
 ================================================================================
                           4.  MULTIQC AND CLOSEOUT
