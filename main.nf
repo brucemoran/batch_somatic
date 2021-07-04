@@ -1549,7 +1549,7 @@ if( !params.pcgr ){
     script:
     """
     ##make one file 'first'
-    LST=\$(echo ls)
+    LST=\$(ls)
     FST=\$(echo \$LST | perl -ane 'print "\$F[0]";')
     cat \$FST > ${params.runID}.HMML_impacts.combined.tsv
     rm \$FST
