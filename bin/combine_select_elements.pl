@@ -19,7 +19,12 @@ my %keyd;
 my $outs;
 
 ##iterate over VCFs in dir
-open(FIL1, "gunzip -c $file_1 |");
+if($file_1 =~ m/".gz$"/){
+  open(FIL1, "gunzip -c $file_1 |");
+}
+else{
+  open(FIL1, $file_1);
+}
 
 while(<FIL1>){
   if($_=~m/^##/){
