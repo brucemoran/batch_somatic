@@ -30,7 +30,9 @@ while(<FIL1>){
   if($_=~m/^##/){
       $outs .= $_;
   }
-
+  if($_=~m/^seqnames/){
+      $outs .= $_;
+  }
   else{
     chomp $_;
     my @sp = split(/\t/);
@@ -46,7 +48,9 @@ while(<FIL2>){
   if($_=~m/^##/){
       next;
   }
-
+  if($_=~m/^seqnames/){
+      next;
+  }
   else{
     chomp $_;
     my @sp = split(/\t/);
