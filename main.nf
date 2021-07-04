@@ -1373,8 +1373,7 @@ process vcfGRa {
   each impact from impactss
 
   output:
-  tuple val(caseID), val("${sampleID}"), file("${sampleID}.*impacts.pcgr.tsv.vcf") into vcfs_pcgr
-  tuple val(caseID), val("${sampleID}"), file("${sampleID}.*consensus.tsv") into tsv_cons
+  tuple val(caseID), val("${sampleID}"), file("${sampleID}.*pcgr.tsv.vcf") into vcfs_pcgr
   file('*') into completedvcfGRangesConsensus
 
   script:
@@ -1529,45 +1528,66 @@ if( params.pcgr ){
 
 if( !params.pcgr ){
 
-  tsv_cons
+  vcfs_pcgr
         .filter{ it[2] =~ "HMML_impacts.consensus.tsv" }
-        .map { it -> it[2] }
-        .set{ hmml_tsv_cons }
+        .set{ hmml_vcf_vep }
 
   process vep_hmml_tsv {
+
+    label 'low_mem'
+
+    input:
+    tuple val(caseID), val(sampleID), file(vep_vcf) from hmml_vcf_vep
+    file(fasta) from reference.fa
+    file(grchver) from reference.grchvers
+    file(pcgrbase) from reference.pcgrbase
+
+    output:
+    file("${sampleID}.${params.runID}.HMML_impacts.vep.vcf") into hmml_vep_vcf
+
+    script:
+    def grch_vers = "${grchver}".split("\\/")[-1]
+    """
+    vep --dir_cache ${pcgrbase}/data/${grch_vers}/.vep \
+      --offline \
+      --assembly ${params.assembly} \
+      --vcf_info_field ANN \
+      --symbol \
+      --species homo_sapiens \
+      --check_existing \
+      --cache \
+      --fork ${task.cpus} \
+      --af_1kg \
+      --af_gnomad \
+      --vcf \
+      --input_file ${vep_vcf} \
+      --output_file ${sampleID}.${params.runID}.HMML_impacts.vep.vcf \
+      --format "vcf" \
+      --fasta ${fasta} \
+      --hgvs \
+      --canonical \
+      --ccds \
+      --force_overwrite \
+      --verbose
+    """
+  }
+
+  process vcf_hmml_tsv {
 
     label 'low_mem'
 
     publishDir path: "${params.outDir}/combined/HMML_impact", mode: "copy"
 
     input:
-    file(cons_tsv) from hmml_tsv_cons.collect()
+    file(vep_vcf) from hmml_vep_vcf.collect()
 
     output:
     file("${params.runID}.HMML_impacts.combined.tab.vcf.tsv") into madetrsv2
 
     script:
     """
-    ##make one file 'first'
-    LST=\$(ls)
-    FST=\$(echo \$LST | perl -ane 'print "\$F[0]";')
-    cat \$FST > ${params.runID}.HMML_impacts.combined.tsv
-    rm \$FST
-
-    ##combine tables of 'first' and each other table
-    ls | while read FILE; do
-
-      WCTEST=\$(wc -l \$FILE | perl -ane 'print \$F[0];')
-      if [[ \$WCTEST > 1 ]]; then
-        perl ${workflow.projectDir}/bin/combine_select_elements.pl \
-          ${params.runID}.HMML_impacts.combined.tsv \
-          \$FILE \
-          1
-
-       ##new table from combine becomes output and combined with next table
-       mv 1 ${params.runID}.HMML_impacts.combined.tsv
-      fi
-    done
+    perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl \
+      ${params.runID}.HMML_impacts.combined
     """
   }
 }
