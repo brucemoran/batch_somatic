@@ -1529,7 +1529,7 @@ if( params.pcgr ){
 if( !params.pcgr ){
 
   vcfs_pcgr
-        .filter{ it[2] =~ "HMML_impacts.consensus.tsv" }
+        .filter{ it[2] =~ "HMML_impacts.pcgr.tsv.vcf" }
         .set{ hmml_vcf_vep }
 
   process vep_hmml_tsv {
