@@ -1556,13 +1556,17 @@ if( !params.pcgr ){
 
     ##combine tables of 'first' and each other table
     ls | while read FILE; do
-      perl ${workflow.projectDir}/bin/combine_select_elements.pl \
-        ${params.runID}.HMML_impacts.combined.tsv \
-        \$FILE \
-        1
 
-     ##new table from combine becomes output and combined with next table
-     mv 1 ${params.runID}.HMML_impacts.combined.tsv
+      WCTEST=\$(wc -l \$FILE | perl -ane 'print \$F[0];')
+      if [[ \$WCTEST > 1 ]]; then
+        perl ${workflow.projectDir}/bin/combine_select_elements.pl \
+          ${params.runID}.HMML_impacts.combined.tsv \
+          \$FILE \
+          1
+
+       ##new table from combine becomes output and combined with next table
+       mv 1 ${params.runID}.HMML_impacts.combined.tsv
+      fi
     done
     """
   }
