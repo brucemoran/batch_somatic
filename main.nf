@@ -1374,6 +1374,7 @@ process vcfGRa {
 
   output:
   tuple val(caseID), val("${sampleID}"), file("${sampleID}.*impacts.pcgr.tsv.vcf") into vcfs_pcgr
+  tuple val(caseID), val("${sampleID}"), file("${sampleID}.*impacts.consensus.tsv") into tsv_cons
   file('*') into completedvcfGRangesConsensus
 
   script:
@@ -1528,24 +1529,10 @@ if( params.pcgr ){
 
 if( !params.pcgr ){
 
-  process hmml_filt {
-
-    label 'low_mem'
-
-    input:
-    file(vcf) from vcfs_pcgr
-
-    output:
-    file(vcf) into madetrsv
-
-    when:
-    vcf =~ '*.HMML_impacts.pcgr.tsv.vcf'
-
-    script:
-    """
-    """
-
-  }
+  tsv_cons
+        .filter{ it[2] =~ "HMML_impacts.consensus.tsv" }
+        .map { it -> it[2] }
+        .set{ hmml_tsv_cons }
 
   process vep_hmml_tsv {
 
@@ -1554,14 +1541,29 @@ if( !params.pcgr ){
     publishDir path: "${params.outDir}/combined/HMML_impact", mode: "copy"
 
     input:
-    file(vcf) from madetrsv.collect()
+    file(cons_tsv) from hmml_tsv_cons.collect()
 
     output:
     file("${params.runID}.HMML_impacts.combined.tab.vcf.tsv") into madetrsv2
 
     script:
     """
-    perl ${workflow.projectDir}/bin/vepHCvcf_combine_tsv.pl "${params.runID}.HMML_impacts.combined"
+    ##make one file 'first'
+    LST=\$(echo ls)
+    FST=\$(echo \$LST | perl -ane 'print "\$F[0]";')
+    cat \$FST > ${params.runID}.HMML_impacts.combined.tsv
+    rm \$FST
+
+    ##combine tables of 'first' and each other table
+    ls | while read FILE; do
+      perl ${workflow.projectDir}/bin/combine_select_elements.pl \
+        ${params.runID}.HMML_impacts.combined.tsv \
+        \$FILE \
+        1
+
+     ##new table from combine becomes output and combined with next table
+     mv 1 ${params.runID}.HMML_impacts.combined.tsv
+    done
     """
   }
 }
