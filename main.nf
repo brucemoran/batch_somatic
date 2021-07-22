@@ -1535,6 +1535,7 @@ if( !params.pcgr ){
   process vep_hmml_tsv {
 
     label 'low_mem'
+    publishDir path: "${params.outDir}/combined/HMML_impact/vcfs", mode: "copy"
 
     input:
     tuple val(caseID), val(sampleID), file(vep_vcf) from hmml_vcf_vep
