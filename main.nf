@@ -1367,6 +1367,7 @@ process vcfGRa {
   label 'med_mem'
 
   publishDir "$params.outDir/cases/$caseID/consensus_variants", mode: 'copy', pattern: '*consensus.tsv'
+  publishDir "$params.outDir/combined/consensus_variants", mode: 'copy', pattern: '*consensus.tsv'
 
   input:
   tuple val(caseID), file(vvcf1), file(vvcf2), file(vvcf3), file(rvcf1), file(rvcf2), file(rvcf3), val(germlineID) from cons_vcfs
