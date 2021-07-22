@@ -1366,7 +1366,7 @@ process vcfGRa {
 
   label 'med_mem'
 
-  publishDir "$params.outDir/cases/$caseID/consensus_variants", mode: 'copy', pattern: '*_impacts.consensus.tsv'
+  publishDir "$params.outDir/cases/$caseID/consensus_variants", mode: 'copy', pattern: '*consensus.tsv'
 
   input:
   tuple val(caseID), file(vvcf1), file(vvcf2), file(vvcf3), file(rvcf1), file(rvcf2), file(rvcf3), val(germlineID) from cons_vcfs
@@ -1375,7 +1375,7 @@ process vcfGRa {
   output:
   tuple val(caseID), val("${sampleID}"), file("${sampleID}.*pcgr.tsv.vcf") into vcfs_pcgr
   file('*') into completedvcfGRangesConsensus
-  file("${sampleID}.*_impacts.consensus.tsv") into cons_vars
+  file("${sampleID}.*consensus.tsv") into cons_vars
 
   script:
   sampleID = "${vvcf1}".split("\\.")[0]
